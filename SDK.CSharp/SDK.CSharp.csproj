@@ -19,8 +19,8 @@
         <PackageTags>openshock</PackageTags>
         <Product>SDK.CSharp</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
         <PackageLicenseUrl>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</PackageLicenseUrl>
-        <PackageLicenseExpression>GPL-3.0+</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>OpenShock.SDK.CSharp</PackageId>
