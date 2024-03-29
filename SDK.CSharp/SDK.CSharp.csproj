@@ -1,0 +1,41 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+        <LangVersion>12</LangVersion>
+        <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
+        <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
+        <Company>OpenShock</Company>
+        <AssemblyVersion>0.0.1</AssemblyVersion>
+        <Version>0.0.1</Version>
+        <Title>SDK.DotNet</Title>
+        <Authors>OpenShock</Authors>
+        <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>
+        <PackageProjectUrl>https://openshock.org</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/OpenShock/SDK.CSharp</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageTags>openshock</PackageTags>
+        <Product>SDK.CSharp</Product>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageLicenseUrl>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicenseExpression>GPL-3.0+</PackageLicenseExpression>
+        <RepositoryType>git</RepositoryType>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageId>OpenShock.SDK.CSharp</PackageId>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="OneOf" Version="3.0.263" />
+      <PackageReference Include="PolySharp" Version="1.14.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
+      <PackageReference Include="System.Text.Json" Version="8.0.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+</Project>
