@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.1</AssemblyVersion>
-        <Version>0.0.1</Version>
+        <AssemblyVersion>0.0.2</AssemblyVersion>
+        <Version>0.0.2</Version>
         <Title>SDK.DotNet</Title>
         <Authors>OpenShock</Authors>
         <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>
@@ -20,10 +20,11 @@
         <Product>SDK.CSharp</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
-        <PackageLicenseUrl>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</PackageLicenseUrl>
+        <PackageLicense>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</PackageLicense>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>OpenShock.SDK.CSharp</PackageId>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>

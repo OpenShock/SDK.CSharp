@@ -4,7 +4,7 @@ using OpenShock.SDK.CSharp.Models;
 
 namespace OpenShock.SDK.CSharp;
 
-public interface IUserRestClient
+public interface IOpenShockApiClient
 {
     public Task<OneOf<Success<IReadOnlyCollection<ResponseDeviceWithShockers>>, UnauthenticatedError>> GetOwnShockers(CancellationToken cancellationToken = default);
 }
