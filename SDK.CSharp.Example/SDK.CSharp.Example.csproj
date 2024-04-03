@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SDK.CSharp.Live\SDK.CSharp.Live.csproj" />
-      <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj" />
     </ItemGroup>
 
 </Project>

@@ -20,7 +20,7 @@
         <Product>SDK.CSharp</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
-        <PackageLicense>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</PackageLicense>
+        <License>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</License>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>OpenShock.SDK.CSharp.Live</PackageId>
@@ -30,7 +30,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.3" />
         <PackageReference Include="OneOf" Version="3.0.263" />
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.1" />
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.2" />
         <PackageReference Include="PolySharp" Version="1.14.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
