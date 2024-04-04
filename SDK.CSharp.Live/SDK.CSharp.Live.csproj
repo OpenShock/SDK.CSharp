@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.5</AssemblyVersion>
-        <Version>0.0.5</Version>
+        <AssemblyVersion>0.0.6</AssemblyVersion>
+        <Version>0.0.6</Version>
         <Title>SDK.DotNet.Live</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
@@ -35,6 +35,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Semver" Version="2.3.0" />
         <PackageReference Include="System.Text.Json" Version="8.0.3" />
     </ItemGroup>
     

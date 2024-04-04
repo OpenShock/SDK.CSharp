@@ -1,36 +1,38 @@
-﻿using Microsoft.AspNetCore.SignalR.Client;
-using OpenShock.SDK.CSharp.Live.Models;
-using OpenShock.SDK.CSharp.Models;
+﻿using OpenShock.SDK.CSharp.Live.Models;
 
 namespace OpenShock.SDK.CSharp.Live;
 
 public interface IOpenShockApiLiveClient
 {
     /// <summary>
-    /// SignalR connection to the OpenShock API. Use this to subscribe to events for its connection state.
-    /// Use the methods of this interface for everything else.
-    /// </summary>
-    public HubConnection Connection { get; }
-    
-    /// <summary>
     /// Starts the connection
     /// </summary>
     /// <returns></returns>
     public Task StartAsync();
-    
+
     /// <summary>
     /// Log event handler
     /// </summary>
-    /// <param name="handler"></param>
-    /// <returns></returns>
-    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>, Task> handler);
+    public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
     
     /// <summary>
     /// Welcome event handler
     /// </summary>
-    /// <param name="handler"></param>
-    /// <returns></returns>
-    public IDisposable OnWelcome(Func<string, Task> handler);
+    public event Func<string, Task>? OnWelcome;
+    
+    /// <summary>
+    /// Whenever something about a device is updated
+    /// </summary>
+    public event Func<Guid, DeviceUpdateType, Task>? OnDeviceUpdate;
+    
+    /// <summary>
+    /// Device online offline status updates
+    /// </summary>
+    public event Func<IEnumerable<DeviceOnlineState>, Task>? OnDeviceStatus;
+    
+    public event Func<Exception?, Task>? Reconnecting;
+    public event Func<Exception?, Task>? Closed;
+    public event Func<string?, Task>? Reconnected;
 
     /// <summary>
     /// Calls ControlV2

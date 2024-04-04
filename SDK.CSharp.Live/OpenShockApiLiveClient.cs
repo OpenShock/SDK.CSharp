@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenShock.SDK.CSharp.Live.Models;
+using OpenShock.SDK.CSharp.Live.Utils;
 using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Utils;
 
@@ -11,19 +12,40 @@ namespace OpenShock.SDK.CSharp.Live;
 
 public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
 {
-    private readonly ApiLiveClientOptions _apiLiveClientOptions;
     private bool _disposed = false;
 
-    public HubConnection Connection { get; }
+    private HubConnection? _connection = null;
 
-    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>, Task> handler) => Connection.On("Log", handler);
-    public IDisposable OnWelcome(Func<string, Task> handler) => Connection.On("Welcome", handler);
+    public Task StartAsync() => _connection == null ? Task.CompletedTask : _connection.StartAsync();
+    public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
+    public event Func<string, Task>? OnWelcome;
+    public event Func<Guid, DeviceUpdateType, Task>? OnDeviceUpdate;
+    public event Func<IEnumerable<DeviceOnlineState>, Task>? OnDeviceStatus;
 
-    public Task StartAsync() => Connection.StartAsync();
+    public event Func<Exception?, Task>? Reconnecting;
+    public event Func<Exception?, Task>? Closed;
+    public event Func<string?, Task>? Reconnected;
 
+    /// <summary>
+    /// Creates a new instance of <see cref="OpenShockApiLiveClient"/>
+    /// Also calls <see cref="Setup"/> with the provided <see cref="ApiLiveClientOptions"/>
+    /// </summary>
+    /// <param name="apiLiveClientOptions"></param>
     public OpenShockApiLiveClient(ApiLiveClientOptions apiLiveClientOptions)
     {
-        _apiLiveClientOptions = apiLiveClientOptions;
+        Setup(apiLiveClientOptions).AsTask().Wait();
+    }
+
+    /// <summary>
+    /// Blank constructor, use <see cref="Setup"/> to setup the client
+    /// </summary>
+    public OpenShockApiLiveClient()
+    {
+    }
+
+    public async ValueTask Setup(ApiLiveClientOptions apiLiveClientOptions)
+    {
+        if (_connection != null) await _connection.DisposeAsync().ConfigureAwait(false);
 
         var url = new Uri(apiLiveClientOptions.Server, "/1/hubs/user");
         var connectionBuilder = new HubConnectionBuilder()
@@ -42,11 +64,24 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
         if (apiLiveClientOptions.ConfigureLogging != null)
             connectionBuilder.ConfigureLogging(apiLiveClientOptions.ConfigureLogging);
 
-        Connection = connectionBuilder.Build();
+        _connection = connectionBuilder.Build();
+
+
+        _connection.Closed += Closed.Raise;
+        _connection.Reconnecting += Reconnecting.Raise;
+        _connection.Reconnected += Reconnected.Raise;
+
+        _connection.On<ControlLogSender, ICollection<ControlLog>>("Log", OnLog.Raise);
+        _connection.On<string>("Welcome", OnWelcome.Raise);
+        _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", OnDeviceUpdate.Raise);
+        _connection.On<IEnumerable<DeviceOnlineState>>("DeviceStatus", OnDeviceStatus.Raise);
     }
 
-    public Task Control(IEnumerable<Control> shocks, string? customName = null) =>
-        Connection.SendAsync("ControlV2", shocks, customName);
+    public Task Control(IEnumerable<Control> shocks, string? customName = null)
+    {
+        if (_connection != null) return _connection.SendAsync("ControlV2", shocks, customName);
+        return Task.CompletedTask;
+    }
 
 
     private string GetUserAgent()
@@ -60,7 +95,7 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
         var entryAssembly = Assembly.GetEntryAssembly();
         var entryAssemblyName = entryAssembly!.GetName();
         var entryAssemblyVersion = entryAssemblyName.Version;
-        
+
         var runtimeVersion = RuntimeInformation.FrameworkDescription;
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
 
@@ -69,13 +104,13 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
             $"({runtimeVersion}; {UserAgentUtils.GetOs()}; SignalR {signalRVersion.Major}.{signalRVersion.Minor}.{signalRVersion.Build}; " +
             $"{entryAssemblyName.Name} {entryAssemblyVersion!.Major}.{entryAssemblyVersion.Minor}.{entryAssemblyVersion.Build})";
     }
-    
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
 
-        await Connection.DisposeAsync();
+        if (_connection != null) await _connection.DisposeAsync();
 
         GC.SuppressFinalize(this);
     }
