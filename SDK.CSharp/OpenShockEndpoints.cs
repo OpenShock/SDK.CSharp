@@ -2,5 +2,5 @@
 
 public static class OpenShockEndpoints
 {
-    public static readonly Uri OwnShockersV1 = new("/1/shockers/own");
+    public static readonly string OwnShockersV1 = "/1/shockers/own";
 }
