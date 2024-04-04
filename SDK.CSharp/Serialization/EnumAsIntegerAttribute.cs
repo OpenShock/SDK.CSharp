@@ -1,4 +1,4 @@
-﻿namespace OpenShock.SDK.CSharp.Live.Serialization;
+﻿namespace OpenShock.SDK.CSharp.Serialization;
 
 [AttributeUsage(AttributeTargets.Enum)]
 public class EnumAsIntegerAttribute : Attribute

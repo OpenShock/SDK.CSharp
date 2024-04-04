@@ -1,4 +1,4 @@
-﻿using OpenShock.SDK.CSharp.Live.Serialization;
+﻿using OpenShock.SDK.CSharp.Serialization;
 
 namespace OpenShock.SDK.CSharp.Models;
 

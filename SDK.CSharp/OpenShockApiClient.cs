@@ -5,6 +5,7 @@ using System.Text.Json;
 using OneOf;
 using OneOf.Types;
 using OpenShock.SDK.CSharp.Models;
+using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Utils;
 
 namespace OpenShock.SDK.CSharp;
@@ -14,6 +15,13 @@ public class OpenShockApiClient : IOpenShockApiClient
     private readonly ApiClientOptions _apiClientOptions;
     private readonly HttpClient _httpClient;
 
+    private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new CustomJsonStringEnumConverter() }
+    };
+
+    
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenShockApiClient"/> class. See parameters' descriptions for more information.
     /// </summary>
@@ -44,16 +52,16 @@ public class OpenShockApiClient : IOpenShockApiClient
         }
 
         #if NETSTANDARD2_1
-        var ownShockersStream = await ownShockersResponse.Content.ReadAsStreamAsync();
+        var ownShockersStream = await ownShockersResponse.Content.ReadAsStringAsync();
         #else
-        var ownShockersStream = await ownShockersResponse.Content.ReadAsStreamAsync(cancellationToken);
+        var ownShockersStream = await ownShockersResponse.Content.ReadAsStringAsync(cancellationToken);
         #endif
         
+
         var ownShockers =
-            await JsonSerializer.DeserializeAsync<IReadOnlyCollection<ResponseDeviceWithShockers>>(
-                ownShockersStream, cancellationToken: cancellationToken);
+            JsonSerializer.Deserialize<BaseResponse<IReadOnlyCollection<ResponseDeviceWithShockers>>>(ownShockersStream, JsonSerializerOptions);
         if (ownShockers == null) throw new OpenShockSdkError("Failed to deserialize own shockers");
-        return new Success<IReadOnlyCollection<ResponseDeviceWithShockers>>(ownShockers);
+        return new Success<IReadOnlyCollection<ResponseDeviceWithShockers>>(ownShockers.Data!);
     }
 
     private string GetUserAgent()
