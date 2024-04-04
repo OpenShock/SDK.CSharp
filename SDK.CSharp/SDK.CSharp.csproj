@@ -20,7 +20,7 @@
         <Product>SDK.CSharp</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
-        <License>https://github.com/OpenShock/SDK.CSharp/blob/master/LICENSE</License>
+        <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>OpenShock.SDK.CSharp</PackageId>
