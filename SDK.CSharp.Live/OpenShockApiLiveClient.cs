@@ -16,8 +16,8 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
 
     public HubConnection Connection { get; }
 
-    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>> handler) => Connection.On("Log", handler);
-    public IDisposable OnWelcome(Func<string> handler) => Connection.On("Welcome", handler);
+    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>, Task> handler) => Connection.On("Log", handler);
+    public IDisposable OnWelcome(Func<string, Task> handler) => Connection.On("Welcome", handler);
 
     public Task StartAsync() => Connection.StartAsync();
 

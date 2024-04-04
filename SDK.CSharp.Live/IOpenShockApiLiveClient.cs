@@ -23,14 +23,14 @@ public interface IOpenShockApiLiveClient
     /// </summary>
     /// <param name="handler"></param>
     /// <returns></returns>
-    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>> handler);
+    public IDisposable OnLog(Func<ControlLogSender, ICollection<ControlLog>, Task> handler);
     
     /// <summary>
     /// Welcome event handler
     /// </summary>
     /// <param name="handler"></param>
     /// <returns></returns>
-    public IDisposable OnWelcome(Func<string> handler);
+    public IDisposable OnWelcome(Func<string, Task> handler);
 
     /// <summary>
     /// Calls ControlV2
