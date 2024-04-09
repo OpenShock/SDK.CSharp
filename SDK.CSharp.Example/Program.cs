@@ -8,7 +8,7 @@ var apiClient = new OpenShockApiClient(new ApiClientOptions()
 
 var a = await apiClient.GetOwnShockers();
 
-var apiLiveClient = new OpenShockApiLiveClient(new ApiLiveClientOptions()
+var apiLiveClient = new OpenShockHubClient(new HubClientOptions()
 {
     Token = "API_TOKEN_HERE"
 });

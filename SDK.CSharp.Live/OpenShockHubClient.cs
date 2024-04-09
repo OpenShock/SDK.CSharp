@@ -10,13 +10,14 @@ using OpenShock.SDK.CSharp.Utils;
 
 namespace OpenShock.SDK.CSharp.Live;
 
-public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
+public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 {
     private bool _disposed = false;
 
     private HubConnection? _connection = null;
 
     public Task StartAsync() => _connection == null ? Task.CompletedTask : _connection.StartAsync();
+    public Task StopAsync() => _connection == null ? Task.CompletedTask : _connection.StopAsync();
     public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
     public event Func<string, Task>? OnWelcome;
     public event Func<Guid, DeviceUpdateType, Task>? OnDeviceUpdate;
@@ -27,31 +28,31 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
     public event Func<string?, Task>? Reconnected;
 
     /// <summary>
-    /// Creates a new instance of <see cref="OpenShockApiLiveClient"/>
-    /// Also calls <see cref="Setup"/> with the provided <see cref="ApiLiveClientOptions"/>
+    /// Creates a new instance of <see cref="OpenShockHubClient"/>
+    /// Also calls <see cref="Setup"/> with the provided <see cref="HubClientOptions"/>
     /// </summary>
-    /// <param name="apiLiveClientOptions"></param>
-    public OpenShockApiLiveClient(ApiLiveClientOptions apiLiveClientOptions)
+    /// <param name="hubClientOptions"></param>
+    public OpenShockHubClient(HubClientOptions hubClientOptions)
     {
-        Setup(apiLiveClientOptions).AsTask().Wait();
+        Setup(hubClientOptions).AsTask().Wait();
     }
 
     /// <summary>
     /// Blank constructor, use <see cref="Setup"/> to setup the client
     /// </summary>
-    public OpenShockApiLiveClient()
+    public OpenShockHubClient()
     {
     }
 
-    public async ValueTask Setup(ApiLiveClientOptions apiLiveClientOptions)
+    public async ValueTask Setup(HubClientOptions hubClientOptions)
     {
         if (_connection != null) await _connection.DisposeAsync().ConfigureAwait(false);
 
-        var url = new Uri(apiLiveClientOptions.Server, "/1/hubs/user");
+        var url = new Uri(hubClientOptions.Server, "/1/hubs/user");
         var connectionBuilder = new HubConnectionBuilder()
             .WithUrl(url, HttpTransportType.WebSockets, options =>
             {
-                options.Headers.Add("OpenShockToken", apiLiveClientOptions.Token);
+                options.Headers.Add("OpenShockToken", hubClientOptions.Token);
                 options.Headers.Add("User-Agent", GetUserAgent());
             })
             .WithAutomaticReconnect(new OpenShockRetryPolicy())
@@ -61,8 +62,8 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
                 options.PayloadSerializerOptions.Converters.Add(new CustomJsonStringEnumConverter());
             });
 
-        if (apiLiveClientOptions.ConfigureLogging != null)
-            connectionBuilder.ConfigureLogging(apiLiveClientOptions.ConfigureLogging);
+        if (hubClientOptions.ConfigureLogging != null)
+            connectionBuilder.ConfigureLogging(hubClientOptions.ConfigureLogging);
 
         _connection = connectionBuilder.Build();
 
@@ -76,6 +77,8 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
         _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", OnDeviceUpdate.Raise);
         _connection.On<IEnumerable<DeviceOnlineState>>("DeviceStatus", OnDeviceStatus.Raise);
     }
+
+    public HubConnectionState State => _connection?.State ?? HubConnectionState.Disconnected;
 
     public Task Control(IEnumerable<Control> shocks, string? customName = null)
     {
@@ -105,6 +108,7 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
             $"{entryAssemblyName.Name} {entryAssemblyVersion!.Major}.{entryAssemblyVersion.Minor}.{entryAssemblyVersion.Build})";
     }
 
+    
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
@@ -115,7 +119,7 @@ public class OpenShockApiLiveClient : IOpenShockApiLiveClient, IAsyncDisposable
         GC.SuppressFinalize(this);
     }
 
-    ~OpenShockApiLiveClient()
+    ~OpenShockHubClient()
     {
         DisposeAsync().AsTask().Wait();
     }

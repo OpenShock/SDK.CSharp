@@ -1,8 +1,9 @@
-﻿using OpenShock.SDK.CSharp.Live.Models;
+﻿using Microsoft.AspNetCore.SignalR.Client;
+using OpenShock.SDK.CSharp.Live.Models;
 
 namespace OpenShock.SDK.CSharp.Live;
 
-public interface IOpenShockApiLiveClient
+public interface IOpenShockHubClient
 {
     /// <summary>
     /// Starts the connection
@@ -33,6 +34,8 @@ public interface IOpenShockApiLiveClient
     public event Func<Exception?, Task>? Reconnecting;
     public event Func<Exception?, Task>? Closed;
     public event Func<string?, Task>? Reconnected;
+    
+    public HubConnectionState State { get; }
 
     /// <summary>
     /// Calls ControlV2
