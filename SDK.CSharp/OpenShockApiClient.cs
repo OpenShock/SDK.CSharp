@@ -5,12 +5,13 @@ using System.Text.Json;
 using OneOf;
 using OneOf.Types;
 using OpenShock.SDK.CSharp.Models;
+using OpenShock.SDK.CSharp.Problems;
 using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Utils;
 
 namespace OpenShock.SDK.CSharp;
 
-public class OpenShockApiClient : IOpenShockApiClient
+public sealed class OpenShockApiClient : IOpenShockApiClient
 {
     private readonly ApiClientOptions _apiClientOptions;
     private readonly HttpClient _httpClient;
@@ -21,7 +22,7 @@ public class OpenShockApiClient : IOpenShockApiClient
         Converters = { new CustomJsonStringEnumConverter() }
     };
 
-    
+
     /// <summary>
     /// Initializes a new instance of the <see cref="OpenShockApiClient"/> class. See parameters' descriptions for more information.
     /// </summary>
@@ -40,28 +41,55 @@ public class OpenShockApiClient : IOpenShockApiClient
         };
     }
 
+    /// <inheritdoc />
     public async Task<OneOf<Success<IReadOnlyCollection<ResponseDeviceWithShockers>>, UnauthenticatedError>>
         GetOwnShockers(CancellationToken cancellationToken = default)
     {
-        using var ownShockersResponse = await _httpClient.GetAsync(OpenShockEndpoints.OwnShockersV1, cancellationToken);
-        if (!ownShockersResponse.IsSuccessStatusCode)
+        using var ownShockersResponse =
+            await _httpClient.GetAsync(OpenShockEndpoints.V1.Shockers.OwnShockers, cancellationToken);
+        if (!ownShockersResponse.IsSuccess())
         {
             if (ownShockersResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
 
             throw new OpenShockApiError("Failed to get own shockers", ownShockersResponse.StatusCode);
         }
 
-        #if NETSTANDARD2_1
-        var ownShockersStream = await ownShockersResponse.Content.ReadAsStringAsync();
-        #else
-        var ownShockersStream = await ownShockersResponse.Content.ReadAsStringAsync(cancellationToken);
-        #endif
-        
+        return new Success<IReadOnlyCollection<ResponseDeviceWithShockers>>(
+            await ownShockersResponse.Content
+                .ReadBaseResponseAsJsonAsync<IReadOnlyCollection<ResponseDeviceWithShockers>>(cancellationToken,
+                    JsonSerializerOptions));
+    }
 
-        var ownShockers =
-            JsonSerializer.Deserialize<BaseResponse<IReadOnlyCollection<ResponseDeviceWithShockers>>>(ownShockersStream, JsonSerializerOptions);
-        if (ownShockers == null) throw new OpenShockSdkError("Failed to deserialize own shockers");
-        return new Success<IReadOnlyCollection<ResponseDeviceWithShockers>>(ownShockers.Data!);
+    /// <inheritdoc />
+    public async
+        Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, DeviceNotConnectedToGateway, UnauthenticatedError>>
+        GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default)
+    {
+        using var gatewayResponse =
+            await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.GetGateway(deviceId), cancellationToken);
+        if (gatewayResponse.IsSuccess())
+        {
+            return new Success<LcgResponse>(
+                await gatewayResponse.Content.ReadBaseResponseAsJsonAsync<LcgResponse>(cancellationToken,
+                    JsonSerializerOptions));
+        }
+        
+        if (gatewayResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+
+        if (!gatewayResponse.IsProblem())
+            throw new OpenShockApiError("Error from backend is not a problem response", gatewayResponse.StatusCode);
+
+        var problem =
+            await gatewayResponse.Content.ReadBaseResponseAsJsonAsync<ProblemDetails>(cancellationToken,
+                JsonSerializerOptions);
+        
+        return problem.Type switch 
+        {
+            "Device.NotFound" => new NotFound(),
+            "Device.NotOnline" => new DeviceOffline(),
+            "Device.NotConnectedToGateway" => new DeviceNotConnectedToGateway(),
+            _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", gatewayResponse.StatusCode)
+        };
     }
 
     private string GetUserAgent()

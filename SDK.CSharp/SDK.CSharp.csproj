@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.6</AssemblyVersion>
-        <Version>0.0.6</Version>
+        <AssemblyVersion>0.0.9</AssemblyVersion>
+        <Version>0.0.9</Version>
         <Title>SDK.DotNet</Title>
         <Authors>OpenShock</Authors>
         <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>

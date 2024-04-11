@@ -66,8 +66,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
             connectionBuilder.ConfigureLogging(hubClientOptions.ConfigureLogging);
 
         _connection = connectionBuilder.Build();
-
-
+        
         _connection.Closed += Closed.Raise;
         _connection.Reconnecting += Reconnecting.Raise;
         _connection.Reconnected += Reconnected.Raise;
