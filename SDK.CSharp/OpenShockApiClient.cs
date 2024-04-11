@@ -80,7 +80,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
             throw new OpenShockApiError("Error from backend is not a problem response", gatewayResponse.StatusCode);
 
         var problem =
-            await gatewayResponse.Content.ReadBaseResponseAsJsonAsync<ProblemDetails>(cancellationToken,
+            await gatewayResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken,
                 JsonSerializerOptions);
         
         return problem.Type switch 
