@@ -14,14 +14,14 @@ using OpenShock.SDK.CSharp.Utils;
 
 namespace OpenShock.SDK.CSharp.Live;
 
-public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IDisposable
+public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IAsyncDisposable
 {
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new CustomJsonStringEnumConverter() }
     };
-    
+
     private readonly string _gateway;
     private readonly Guid _deviceId;
     private readonly string _authToken;
@@ -30,6 +30,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
 
     public event Func<WebsocketConnectionStatus, Task>? OnStatusUpdate;
     private WebsocketConnectionStatus _signalRStatus = WebsocketConnectionStatus.Disconnected;
+
+    public event Func<Task>? OnDispose;
 
     private readonly CancellationTokenSource _dispose;
     private CancellationTokenSource _linked;
@@ -83,8 +85,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
     }
 
     public struct Shutdown;
+
     public struct Reconnecting;
-    
+
     private async Task<OneOf<Success, NotFound, Shutdown, Reconnecting>> ConnectAsync()
     {
         if (_dispose.IsCancellationRequested)
@@ -128,8 +131,11 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
             if (e.Message.Contains("404"))
             {
                 _logger.LogError("Device not found, shutting down");
+                _dispose.Dispose();
+                await OnDispose.Raise();
                 return new NotFound();
             }
+
             _logger.LogError(e, "Error while connecting, retrying in 3 seconds");
         }
         catch (Exception e)
@@ -261,13 +267,14 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
                     _logger.LogWarning("Ping response data is null");
                     return;
                 }
-                
+
                 var pingResponse = wsRequest.Data.Deserialize<PingResponse>(JsonSerializerOptions);
-                if(pingResponse == null)
+                if (pingResponse == null)
                 {
                     _logger.LogWarning("Ping response data failed to deserialize");
                     return;
                 }
+
                 await QueueMessage(new BaseRequest<LiveRequestType>
                 {
                     RequestType = LiveRequestType.Pong,
@@ -280,13 +287,14 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
                     _logger.LogWarning("Latency announce response data is null");
                     return;
                 }
-                
+
                 var latencyAnnounceResponse = wsRequest.Data.Deserialize<LatencyAnnounceData>(JsonSerializerOptions);
-                if(latencyAnnounceResponse == null)
+                if (latencyAnnounceResponse == null)
                 {
                     _logger.LogWarning("Latency announce response data failed to deserialize");
                     return;
                 }
+
                 Latency = latencyAnnounceResponse.OwnLatency;
                 break;
         }
@@ -294,11 +302,17 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
 
     private bool _disposed = false;
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
         _disposed = true;
 
+#if NET7_0_OR_GREATER
+        await _dispose.CancelAsync();
+#else
+        _dispose.Cancel();
+#endif
+        await OnDispose.Raise();
         _clientWebSocket?.Dispose();
     }
 
@@ -330,7 +344,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, ID
             }, TaskContinuationOptions.OnlyOnFaulted);
 
     public ulong Latency { get; private set; } = 0;
-    
+
     public async Task SendFrame(ClientLiveFrame frame)
     {
         await QueueMessage(new BaseRequest<LiveRequestType>()

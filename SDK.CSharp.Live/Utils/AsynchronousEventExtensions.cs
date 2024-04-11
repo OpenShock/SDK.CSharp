@@ -2,6 +2,18 @@
 
 public static class AsynchronousEventExtensions
 {
+    public static Task Raise(this Func<Task>? handlers)
+    {
+        if (handlers != null)
+        {
+            return Task.WhenAll(handlers.GetInvocationList()
+                .OfType<Func<Task>>()
+                .Select(h => h()));
+        }
+
+        return Task.CompletedTask;
+    }
+    
     public static Task Raise<T0>(this Func<T0, Task>? handlers, T0 t0)
     {
         if (handlers != null)

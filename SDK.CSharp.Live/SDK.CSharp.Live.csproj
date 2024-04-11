@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.10</AssemblyVersion>
-        <Version>0.0.10</Version>
+        <AssemblyVersion>0.0.11</AssemblyVersion>
+        <Version>0.0.11</Version>
         <Title>SDK.DotNet.Live</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
