@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
         <PackageReference Include="OneOf" Version="3.0.263" />
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.9" />
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.13" />
         <PackageReference Include="PolySharp" Version="1.14.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
