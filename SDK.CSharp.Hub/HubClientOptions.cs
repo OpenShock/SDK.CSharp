@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace OpenShock.SDK.CSharp.Live;
+namespace OpenShock.SDK.CSharp.Hub;
 
 public sealed class HubClientOptions
 {

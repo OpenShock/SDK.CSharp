@@ -1,4 +1,4 @@
-﻿namespace OpenShock.SDK.CSharp.Live.Utils;
+﻿namespace OpenShock.SDK.CSharp.Utils;
 
 public static class AsynchronousEventExtensions
 {

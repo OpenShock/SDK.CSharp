@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 
-namespace OpenShock.SDK.CSharp.Live;
+namespace OpenShock.SDK.CSharp.Hub;
 
 public sealed class OpenShockRetryPolicy : IRetryPolicy
 {

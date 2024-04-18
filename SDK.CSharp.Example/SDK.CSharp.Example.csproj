@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\SDK.CSharp.Hub\SDK.CSharp.Hub.csproj" />
       <ProjectReference Include="..\SDK.CSharp.Live\SDK.CSharp.Live.csproj" />
     </ItemGroup>
 

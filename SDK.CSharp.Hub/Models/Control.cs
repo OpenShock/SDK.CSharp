@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using OpenShock.SDK.CSharp.Models;
 
-namespace OpenShock.SDK.CSharp.Live.Models;
+namespace OpenShock.SDK.CSharp.Hub.Models;
 
 public class Control
 {

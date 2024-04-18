@@ -1,4 +1,4 @@
-﻿namespace OpenShock.SDK.CSharp.Live.Models;
+﻿namespace OpenShock.SDK.CSharp.Hub.Models;
 
 public enum DeviceUpdateType
 {

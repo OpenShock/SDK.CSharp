@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OpenShock.SDK.CSharp;
+using OpenShock.SDK.CSharp.Hub;
 using OpenShock.SDK.CSharp.Live;
 
 var hostBuilder = Host.CreateDefaultBuilder();
@@ -15,7 +16,7 @@ var apiClient = new OpenShockApiClient(new ApiClientOptions()
 
 var a = await apiClient.GetOwnShockers();
 
-
+var b = await apiClient.GetDeviceGateway(Guid.Parse("bc849182-89e0-43ff-817b-32400be3f97d"));
 
 var apiLiveClient = new OpenShockHubClient(new HubClientOptions()
 {

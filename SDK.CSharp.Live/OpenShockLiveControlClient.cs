@@ -28,8 +28,10 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private readonly ILogger<OpenShockLiveControlClient> _logger;
     private ClientWebSocket? _clientWebSocket = null;
 
-    public event Func<WebsocketConnectionStatus, Task>? OnStatusUpdate;
-    private WebsocketConnectionStatus _signalRStatus = WebsocketConnectionStatus.Disconnected;
+    public event Func<WebsocketConnectionState, Task>? OnStateUpdate;
+    public event Func<Task>? OnDeviceNotConnected;
+    public event Func<Task>? OnDeviceConnected;
+    private WebsocketConnectionState _state = WebsocketConnectionState.Disconnected;
 
     public event Func<Task>? OnDispose;
 
@@ -57,13 +59,13 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private ValueTask QueueMessage(BaseRequest<LiveRequestType> data) =>
         _channel.Writer.WriteAsync(data, _dispose.Token);
 
-    public WebsocketConnectionStatus Status
+    public WebsocketConnectionState State
     {
-        get => _signalRStatus;
+        get => _state;
         private set
         {
-            _signalRStatus = value;
-            OnStatusUpdate?.Raise(value);
+            _state = value;
+            OnStateUpdate?.Raise(value);
         }
     }
 
@@ -96,7 +98,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             return new Shutdown();
         }
 
-        Status = WebsocketConnectionStatus.Connecting;
+        State = WebsocketConnectionState.Connecting;
 #if NETSTANDARD2_1
       _currentConnectionClose?.Cancel();
 #else
@@ -119,7 +121,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             await _clientWebSocket.ConnectAsync(new Uri($"wss://{_gateway}/1/ws/live/{_deviceId}"), _linked.Token);
 
             _logger.LogInformation("Connected to websocket");
-            Status = WebsocketConnectionStatus.Connected;
+            State = WebsocketConnectionState.Connected;
 
             Run(ReceiveLoop, _linked.Token);
             Run(MessageLoop, _linked.Token);
@@ -143,7 +145,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             _logger.LogError(e, "Error while connecting, retrying in 3 seconds");
         }
 
-        Status = WebsocketConnectionStatus.Reconnecting;
+        State = WebsocketConnectionState.Reconnecting;
         _clientWebSocket.Abort();
         _clientWebSocket.Dispose();
         await Task.Delay(3000, _dispose.Token);
@@ -245,7 +247,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
 
         _logger.LogWarning("Lost websocket connection, trying to reconnect in 3 seconds");
-        Status = WebsocketConnectionStatus.Reconnecting;
+        State = WebsocketConnectionState.Reconnecting;
 
         _clientWebSocket?.Abort();
         _clientWebSocket?.Dispose();
@@ -296,6 +298,13 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 }
 
                 Latency = latencyAnnounceResponse.OwnLatency;
+                break;
+            
+            case LiveResponseType.DeviceNotConnected:
+                await OnDeviceNotConnected.Raise();
+                break;
+            case LiveResponseType.DeviceConnected:
+                await OnDeviceConnected.Raise();
                 break;
         }
     }

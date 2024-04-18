@@ -1,51 +1,46 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿hu<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
+
         <LangVersion>12</LangVersion>
-        <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
+        <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
+        <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
         <Company>OpenShock</Company>
         <AssemblyVersion>0.0.13</AssemblyVersion>
         <Version>0.0.13</Version>
-        <Title>SDK.DotNet.Live</Title>
+        <Title>SDK.DotNet.Hub</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
         <PackageProjectUrl>https://openshock.org</PackageProjectUrl>
         <RepositoryUrl>https://github.com/OpenShock/SDK.CSharp</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
         <PackageTags>openshock</PackageTags>
-        <Product>SDK.CSharp.Live</Product>
+        <Product>SDK.CSharp.Hub</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <IncludeSymbols>true</IncludeSymbols>
         <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
         <RepositoryType>git</RepositoryType>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageId>OpenShock.SDK.CSharp.Live</PackageId>
+        <PackageId>OpenShock.SDK.CSharp.Hub</PackageId>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-        <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.0" />
-        <PackageReference Include="OneOf" Version="3.0.263" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4"/>
+        <PackageReference Include="OneOf" Version="3.0.263"/>
         <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.13" />
-        <PackageReference Include="PolySharp" Version="1.14.1">
-            <PrivateAssets>all</PrivateAssets>
-            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Semver" Version="2.3.0" />
-        <PackageReference Include="System.Text.Json" Version="8.0.3" />
-        <PackageReference Include="System.Threading.Channels" Version="8.0.0" />
+        <PackageReference Include="Semver" Version="2.3.0"/>
     </ItemGroup>
-    
+
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
-    
+
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj" />
+        <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj"/>
     </ItemGroup>
+
 </Project>

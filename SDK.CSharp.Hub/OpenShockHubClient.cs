@@ -3,12 +3,11 @@ using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
-using OpenShock.SDK.CSharp.Live.Models;
-using OpenShock.SDK.CSharp.Live.Utils;
+using OpenShock.SDK.CSharp.Hub.Models;
 using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Utils;
 
-namespace OpenShock.SDK.CSharp.Live;
+namespace OpenShock.SDK.CSharp.Hub;
 
 public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 {
@@ -16,7 +15,12 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 
     private HubConnection? _connection = null;
 
-    public Task StartAsync() => _connection == null ? Task.CompletedTask : _connection.StartAsync();
+    public async Task StartAsync()
+    {
+        if(_connection != null) await _connection.StartAsync();
+        await Connected.Raise(_connection?.ConnectionId);
+    }
+
     public Task StopAsync() => _connection == null ? Task.CompletedTask : _connection.StopAsync();
     public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
     public event Func<string, Task>? OnWelcome;
@@ -26,6 +30,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
     public event Func<Exception?, Task>? Reconnecting;
     public event Func<Exception?, Task>? Closed;
     public event Func<string?, Task>? Reconnected;
+    public event Func<string?, Task>? Connected;
 
     /// <summary>
     /// Creates a new instance of <see cref="OpenShockHubClient"/>
@@ -70,7 +75,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
         _connection.Closed += Closed.Raise;
         _connection.Reconnecting += Reconnecting.Raise;
         _connection.Reconnected += Reconnected.Raise;
-
+        
         _connection.On<ControlLogSender, ICollection<ControlLog>>("Log", OnLog.Raise);
         _connection.On<string>("Welcome", OnWelcome.Raise);
         _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", OnDeviceUpdate.Raise);

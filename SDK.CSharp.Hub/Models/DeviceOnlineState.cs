@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
-using OpenShock.SDK.CSharp.Live.Utils;
+using OpenShock.SDK.CSharp.Hub.Utils;
 using Semver;
 
-namespace OpenShock.SDK.CSharp.Live.Models;
+namespace OpenShock.SDK.CSharp.Hub.Models;
 
 public sealed class DeviceOnlineState
 {
