@@ -1,4 +1,4 @@
-﻿hu<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -9,8 +9,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.13</AssemblyVersion>
-        <Version>0.0.13</Version>
+        <AssemblyVersion>0.0.15</AssemblyVersion>
+        <Version>0.0.15</Version>
         <Title>SDK.DotNet.Hub</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
@@ -31,7 +31,11 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.4"/>
         <PackageReference Include="OneOf" Version="3.0.263"/>
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.13" />
+        <PackageReference Include="PolySharp" Version="1.14.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.15" />
         <PackageReference Include="Semver" Version="2.3.0"/>
     </ItemGroup>
 

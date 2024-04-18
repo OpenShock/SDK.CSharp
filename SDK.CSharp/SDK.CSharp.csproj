@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.13</AssemblyVersion>
-        <Version>0.0.13</Version>
+        <AssemblyVersion>0.0.15</AssemblyVersion>
+        <Version>0.0.15</Version>
         <Title>SDK.DotNet</Title>
         <Authors>OpenShock</Authors>
         <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>
@@ -28,12 +28,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="OneOf" Version="3.0.263" />
-      <PackageReference Include="PolySharp" Version="1.14.1">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      </PackageReference>
-      <PackageReference Include="System.Text.Json" Version="8.0.3" />
+        <PackageReference Include="OneOf" Version="3.0.263"/>
+        <PackageReference Include="PolySharp" Version="1.14.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' " Include="System.Text.Json" Version="8.0.3"/>
     </ItemGroup>
 
     <ItemGroup>
