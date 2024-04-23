@@ -7,6 +7,8 @@ public enum LiveResponseType
 {
     Frame = 0,
     
+    TPS = 50,
+    
     DeviceNotConnected = 100,
     DeviceConnected = 101,
     ShockerNotFound = 150,

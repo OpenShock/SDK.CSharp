@@ -100,7 +100,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         State = WebsocketConnectionState.Connecting;
 #if NETSTANDARD2_1
-      _currentConnectionClose?.Cancel();
+        _currentConnectionClose?.Cancel();
 #else
         if (_currentConnectionClose != null) await _currentConnectionClose.CancelAsync();
 #endif
@@ -213,7 +213,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 message.Switch(wsRequest => { Run(HandleMessage(wsRequest)); },
                     failed =>
                     {
-                        _logger.LogWarning("Deserialization failed for websocket message {Exception}",
+                        _logger.LogWarning("Deserialization failed for websocket message [{Message}] \n\n {Exception}",
+                            failed.Message,
                             failed.Exception);
                     },
                     _ => { });
@@ -299,7 +300,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
                 Latency = latencyAnnounceResponse.OwnLatency;
                 break;
-            
+
             case LiveResponseType.DeviceNotConnected:
                 await OnDeviceNotConnected.Raise();
                 break;
