@@ -23,12 +23,13 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         Converters = { new CustomJsonStringEnumConverter() }
     };
 
-    private readonly string _gateway;
-    private readonly Guid _deviceId;
+    public string Gateway { get; }
+    public Guid DeviceId { get; }
+    
     private readonly string _authToken;
     private readonly ILogger<OpenShockLiveControlClient> _logger;
     private ClientWebSocket? _clientWebSocket = null;
-    
+
     public event Func<Task>? OnDeviceNotConnected;
     public event Func<Task>? OnDeviceConnected;
     public event Func<Task>? OnDispose;
@@ -43,8 +44,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     public OpenShockLiveControlClient(string gateway, Guid deviceId, string authToken,
         ILogger<OpenShockLiveControlClient> logger)
     {
-        _gateway = gateway;
-        _deviceId = deviceId;
+        Gateway = gateway;
+        DeviceId = deviceId;
         _authToken = authToken;
         _logger = logger;
 
@@ -57,7 +58,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private ValueTask QueueMessage(BaseRequest<LiveRequestType> data) =>
         _channel.Writer.WriteAsync(data, _dispose.Token);
 
-    private readonly AsyncUpdatableVariable<WebsocketConnectionState> _state = new(WebsocketConnectionState.Disconnected);
+    private readonly AsyncUpdatableVariable<WebsocketConnectionState> _state =
+        new(WebsocketConnectionState.Disconnected);
+
     public IAsyncUpdatable<WebsocketConnectionState> State => _state;
 
     private async Task MessageLoop()
@@ -108,7 +111,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         _logger.LogInformation("Connecting to websocket....");
         try
         {
-            await _clientWebSocket.ConnectAsync(new Uri($"wss://{_gateway}/1/ws/live/{_deviceId}"), _linked.Token);
+            await _clientWebSocket.ConnectAsync(new Uri($"wss://{Gateway}/1/ws/live/{DeviceId}"), _linked.Token);
 
             _logger.LogInformation("Connected to websocket");
             _state.Value = WebsocketConnectionState.Connected;
@@ -344,6 +347,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             }, TaskContinuationOptions.OnlyOnFaulted);
 
     private readonly AsyncUpdatableVariable<ulong> _latency = new(0);
+
     public IAsyncUpdatable<ulong> Latency => _latency;
 
     public async Task SendFrame(ClientLiveFrame frame)
