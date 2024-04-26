@@ -1,18 +1,16 @@
-﻿using OneOf;
-using OneOf.Types;
-using OpenShock.SDK.CSharp.Live.LiveControlModels;
+﻿using OpenShock.SDK.CSharp.Live.LiveControlModels;
+using OpenShock.SDK.CSharp.Updatables;
 
 namespace OpenShock.SDK.CSharp.Live;
 
 public interface IOpenShockLiveControlClient
 {
-    public ulong Latency { get; }
-    public WebsocketConnectionState State { get; }
+    public IAsyncUpdatable<ulong> Latency { get; }
+    public IAsyncUpdatable<WebsocketConnectionState> State { get; }
 
     # region Events
 
     public event Func<Task>? OnDispose;
-    public event Func<WebsocketConnectionState, Task>? OnStateUpdate;
     public event Func<Task>? OnDeviceNotConnected;
     public event Func<Task>? OnDeviceConnected;
 

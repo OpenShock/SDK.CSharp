@@ -10,6 +10,7 @@ using OneOf.Types;
 using OpenShock.SDK.CSharp.Live.LiveControlModels;
 using OpenShock.SDK.CSharp.Live.Utils;
 using OpenShock.SDK.CSharp.Serialization;
+using OpenShock.SDK.CSharp.Updatables;
 using OpenShock.SDK.CSharp.Utils;
 
 namespace OpenShock.SDK.CSharp.Live;
@@ -27,12 +28,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private readonly string _authToken;
     private readonly ILogger<OpenShockLiveControlClient> _logger;
     private ClientWebSocket? _clientWebSocket = null;
-
-    public event Func<WebsocketConnectionState, Task>? OnStateUpdate;
+    
     public event Func<Task>? OnDeviceNotConnected;
     public event Func<Task>? OnDeviceConnected;
-    private WebsocketConnectionState _state = WebsocketConnectionState.Disconnected;
-
     public event Func<Task>? OnDispose;
 
     private readonly CancellationTokenSource _dispose;
@@ -59,16 +57,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private ValueTask QueueMessage(BaseRequest<LiveRequestType> data) =>
         _channel.Writer.WriteAsync(data, _dispose.Token);
 
-    public WebsocketConnectionState State
-    {
-        get => _state;
-        private set
-        {
-            _state = value;
-            OnStateUpdate?.Raise(value);
-        }
-    }
-
+    private readonly AsyncUpdatableVariable<WebsocketConnectionState> _state = new(WebsocketConnectionState.Disconnected);
+    public IAsyncUpdatable<WebsocketConnectionState> State => _state;
 
     private async Task MessageLoop()
     {
@@ -98,7 +88,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             return new Shutdown();
         }
 
-        State = WebsocketConnectionState.Connecting;
+        _state.Value = WebsocketConnectionState.Connecting;
 #if NETSTANDARD2_1
         _currentConnectionClose?.Cancel();
 #else
@@ -121,7 +111,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             await _clientWebSocket.ConnectAsync(new Uri($"wss://{_gateway}/1/ws/live/{_deviceId}"), _linked.Token);
 
             _logger.LogInformation("Connected to websocket");
-            State = WebsocketConnectionState.Connected;
+            _state.Value = WebsocketConnectionState.Connected;
 
             Run(ReceiveLoop, _linked.Token);
             Run(MessageLoop, _linked.Token);
@@ -145,7 +135,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             _logger.LogError(e, "Error while connecting, retrying in 3 seconds");
         }
 
-        State = WebsocketConnectionState.Reconnecting;
+        _state.Value = WebsocketConnectionState.Reconnecting;
         _clientWebSocket.Abort();
         _clientWebSocket.Dispose();
         await Task.Delay(3000, _dispose.Token);
@@ -248,7 +238,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
 
         _logger.LogWarning("Lost websocket connection, trying to reconnect in 3 seconds");
-        State = WebsocketConnectionState.Reconnecting;
+        _state.Value = WebsocketConnectionState.Reconnecting;
 
         _clientWebSocket?.Abort();
         _clientWebSocket?.Dispose();
@@ -298,7 +288,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                     return;
                 }
 
-                Latency = latencyAnnounceResponse.OwnLatency;
+                _latency.Value = latencyAnnounceResponse.OwnLatency;
                 break;
 
             case LiveResponseType.DeviceNotConnected:
@@ -353,7 +343,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                     file.Substring(index + 1, file.Length - index - 1), member, line, t.Exception?.StackTrace);
             }, TaskContinuationOptions.OnlyOnFaulted);
 
-    public ulong Latency { get; private set; } = 0;
+    private readonly AsyncUpdatableVariable<ulong> _latency = new(0);
+    public IAsyncUpdatable<ulong> Latency => _latency;
 
     public async Task SendFrame(ClientLiveFrame frame)
     {
