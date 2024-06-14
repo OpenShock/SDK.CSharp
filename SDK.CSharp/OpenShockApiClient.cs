@@ -73,7 +73,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
                 await gatewayResponse.Content.ReadBaseResponseAsJsonAsync<LcgResponse>(cancellationToken,
                     JsonSerializerOptions));
         }
-        
+
         if (gatewayResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
 
         if (!gatewayResponse.IsProblem())
@@ -82,8 +82,8 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         var problem =
             await gatewayResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken,
                 JsonSerializerOptions);
-        
-        return problem.Type switch 
+
+        return problem.Type switch
         {
             "Device.NotFound" => new NotFound(),
             "Device.NotOnline" => new DeviceOffline(),
@@ -96,7 +96,26 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     public async Task<RootResponse> GetRoot(CancellationToken cancellationToken = default)
     {
         using var rootResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Root, cancellationToken);
-        return await rootResponse.Content.ReadBaseResponseAsJsonAsync<RootResponse>(cancellationToken, JsonSerializerOptions);
+        return await rootResponse.Content.ReadBaseResponseAsJsonAsync<RootResponse>(cancellationToken,
+            JsonSerializerOptions);
+    }
+
+    /// <inheritdoc />
+    public async Task<OneOf<Success<SelfResponse>, UnauthenticatedError>> GetSelf(
+        CancellationToken cancellationToken = default)
+    {
+        using var selfResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Users.Self, cancellationToken);
+
+        if (!selfResponse.IsSuccess())
+        {
+            if (selfResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+
+            throw new OpenShockApiError("Failed to get user self", selfResponse.StatusCode);
+        }
+
+        return new Success<SelfResponse>(
+            await selfResponse.Content.ReadBaseResponseAsJsonAsync<SelfResponse>(cancellationToken,
+                JsonSerializerOptions));
     }
 
     private string GetUserAgent()

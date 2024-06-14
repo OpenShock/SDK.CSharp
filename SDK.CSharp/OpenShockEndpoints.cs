@@ -17,5 +17,10 @@ public static class OpenShockEndpoints
             public static string Get(Guid deviceId) => $"1/devices/{deviceId}";
             public static string GetGateway(Guid deviceId) => $"1/devices/{deviceId}/lcg";
         }
+
+        public static class Users
+        {
+            public const string Self = "1/users/self";
+        }
     }
 }

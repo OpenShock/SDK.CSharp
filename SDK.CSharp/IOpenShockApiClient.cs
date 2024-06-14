@@ -29,6 +29,13 @@ public interface IOpenShockApiClient
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<RootResponse> GetRoot(CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get user's information
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<OneOf<Success<SelfResponse>, UnauthenticatedError>> GetSelf(CancellationToken cancellationToken = default);
 
 }
 
