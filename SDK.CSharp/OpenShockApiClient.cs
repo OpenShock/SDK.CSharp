@@ -92,6 +92,13 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         };
     }
 
+    /// <inheritdoc />
+    public async Task<RootResponse> GetRoot(CancellationToken cancellationToken = default)
+    {
+        using var rootResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Root, cancellationToken);
+        return await rootResponse.Content.ReadBaseResponseAsJsonAsync<RootResponse>(cancellationToken, JsonSerializerOptions);
+    }
+
     private string GetUserAgent()
     {
         var liveClientAssembly = GetType().Assembly;

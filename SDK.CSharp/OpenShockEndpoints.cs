@@ -5,6 +5,8 @@ public static class OpenShockEndpoints
     
     public static class V1
     {
+        public const string Root = "1";
+        
         public static class Shockers
         {
             public const string OwnShockers = "1/shockers/own";
