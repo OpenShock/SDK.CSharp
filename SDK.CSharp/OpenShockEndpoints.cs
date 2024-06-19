@@ -28,7 +28,7 @@ public static class OpenShockEndpoints
     {
         public static class Shockers
         {
-            public const string Control = "1/shockers/control";
+            public const string Control = "2/shockers/control";
         }
     }
 }
