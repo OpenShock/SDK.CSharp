@@ -1,5 +1,6 @@
 ﻿using OneOf;
 using OneOf.Types;
+using OpenShock.SDK.CSharp.Errors;
 using OpenShock.SDK.CSharp.Models;
 
 namespace OpenShock.SDK.CSharp;
@@ -37,7 +38,14 @@ public interface IOpenShockApiClient
     /// <returns></returns>
     public Task<OneOf<Success<SelfResponse>, UnauthenticatedError>> GetSelf(CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Control a shocker
+    /// </summary>
+    /// <param name="controlRequest"></param>
+    /// <returns></returns>
+    public Task<OneOf<Success, ShockerNotFoundOrNoAccess, ShockerPaused, ShockerNoPermission, UnauthenticatedError>> ControlShocker(ControlRequest controlRequest);
 }
 
 public struct DeviceOffline;
 public struct DeviceNotConnectedToGateway;
+

@@ -1,9 +1,11 @@
 ﻿using System.Net;
+using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using OneOf;
 using OneOf.Types;
+using OpenShock.SDK.CSharp.Errors;
 using OpenShock.SDK.CSharp.Models;
 using OpenShock.SDK.CSharp.Problems;
 using OpenShock.SDK.CSharp.Serialization;
@@ -116,6 +118,31 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         return new Success<SelfResponse>(
             await selfResponse.Content.ReadBaseResponseAsJsonAsync<SelfResponse>(cancellationToken,
                 JsonSerializerOptions));
+    }
+
+    public async Task<OneOf<Success, ShockerNotFoundOrNoAccess, ShockerPaused, ShockerNoPermission, UnauthenticatedError>> ControlShocker(ControlRequest controlRequest)
+    {
+        using var controlResponse =
+            await _httpClient.PostAsJsonAsync(OpenShockEndpoints.V2.Shockers.Control, controlRequest);
+
+        if (controlResponse.IsSuccess()) return new Success();
+        
+        if (controlResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+        
+        if (!controlResponse.IsProblem())
+            throw new OpenShockApiError("Error from backend is not a problem response", controlResponse.StatusCode);
+
+        var problem =
+            await controlResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(default,
+                JsonSerializerOptions);
+
+        return problem.Type switch
+        {
+            "Shocker.Control.NotFound" => new ShockerNotFoundOrNoAccess(problem.ShockerId),
+            "Shocker.Control.Paused" => new ShockerPaused(problem.ShockerId),
+            "Shocker.Control.NoPermission" => new ShockerNoPermission(problem.ShockerId),
+            _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", controlResponse.StatusCode)
+        };
     }
 
     private string GetUserAgent()

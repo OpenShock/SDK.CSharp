@@ -23,4 +23,12 @@ public static class OpenShockEndpoints
             public const string Self = "1/users/self";
         }
     }
+
+    public static class V2
+    {
+        public static class Shockers
+        {
+            public const string Control = "1/shockers/control";
+        }
+    }
 }
