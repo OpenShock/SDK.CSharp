@@ -34,10 +34,13 @@
         </PackageReference>
         <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' " Include="System.ComponentModel.Annotations" Version="5.0.0" />
         <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' " Include="System.Net.Http.Json" Version="8.0.0" />
-        <PackageReference Condition=" '$(TargetFramework)' == 'netstandard2.1' " Include="System.Text.Json" Version="8.0.3"/>
     </ItemGroup>
 
     <ItemGroup>
         <None Include="..\README.md" Pack="true" PackagePath="\"/>
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+      <PackageReference Include="System.Text.Json" Version="8.0.4" />
     </ItemGroup>
 </Project>
