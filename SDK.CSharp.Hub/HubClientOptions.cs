@@ -1,12 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
+using OpenShock.SDK.CSharp;
 
 namespace OpenShock.SDK.CSharp.Hub;
 
-public sealed class HubClientOptions
+public sealed class HubClientOptions : ApiClientOptions
 {
-    public Uri Server { get; set; } = new Uri("https://api.shocklink.net");
-    public required string Token { get; set; }
-
+    /// <summary>
+    /// Optional configuration for the logging builder.
+    /// </summary>
     public Action<ILoggingBuilder>? ConfigureLogging { get; set; } = null;
 
+    
 }

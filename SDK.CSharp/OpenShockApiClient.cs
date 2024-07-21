@@ -150,10 +150,18 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         var liveClientAssembly = GetType().Assembly;
         var liveClientVersion = liveClientAssembly.GetName().Version!;
 
+        string programName;
+        Version programVersion;
 
-        var entryAssembly = Assembly.GetEntryAssembly();
-        var entryAssemblyName = entryAssembly!.GetName();
-        var entryAssemblyVersion = entryAssemblyName.Version;
+        if (_apiClientOptions.Program == null)
+        {
+            (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
+        }
+        else
+        {
+            programName = _apiClientOptions.Program.Name;
+            programVersion = _apiClientOptions.Program.Version;
+        }
 
         var runtimeVersion = RuntimeInformation.FrameworkDescription;
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
@@ -161,6 +169,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         return
             $"OpenShock.SDK.CSharp/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()};" +
-            $" {entryAssemblyName.Name} {entryAssemblyVersion!.Major}.{entryAssemblyVersion.Minor}.{entryAssemblyVersion.Build})";
+            $" {programName} {programVersion.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
+    
 }

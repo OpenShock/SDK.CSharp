@@ -9,8 +9,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.19</AssemblyVersion>
-        <Version>0.0.19</Version>
+        <AssemblyVersion>0.0.24</AssemblyVersion>
+        <Version>0.0.24</Version>
         <Title>SDK.DotNet.Hub</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
@@ -35,7 +35,7 @@
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.23" />
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.24" />
         <PackageReference Include="Semver" Version="2.3.0"/>
     </ItemGroup>
 

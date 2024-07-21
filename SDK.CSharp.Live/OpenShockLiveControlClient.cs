@@ -28,6 +28,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     
     private readonly string _authToken;
     private readonly ILogger<OpenShockLiveControlClient> _logger;
+    private readonly ApiClientOptions.ProgramInfo? _programInfo;
     private ClientWebSocket? _clientWebSocket = null;
 
     public event Func<Task>? OnDeviceNotConnected;
@@ -42,12 +43,13 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         _channel = Channel.CreateUnbounded<BaseRequest<LiveRequestType>>();
 
     public OpenShockLiveControlClient(string gateway, Guid deviceId, string authToken,
-        ILogger<OpenShockLiveControlClient> logger)
+        ILogger<OpenShockLiveControlClient> logger, ApiClientOptions.ProgramInfo? programInfo = null)
     {
         Gateway = gateway;
         DeviceId = deviceId;
         _authToken = authToken;
         _logger = logger;
+        _programInfo = programInfo;
 
         _dispose = new CancellationTokenSource();
         _linked = _dispose;
@@ -151,9 +153,18 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         var liveClientAssembly = GetType().Assembly;
         var liveClientVersion = liveClientAssembly.GetName().Version!;
 
-        var entryAssembly = Assembly.GetEntryAssembly();
-        var entryAssemblyName = entryAssembly!.GetName();
-        var entryAssemblyVersion = entryAssemblyName.Version;
+        string programName;
+        Version programVersion;
+        
+        if (_programInfo == null)
+        {
+            (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
+        }
+        else
+        {
+            programName = _programInfo.Name;
+            programVersion = _programInfo.Version;
+        }
 
         var runtimeVersion = RuntimeInformation.FrameworkDescription;
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
@@ -161,7 +172,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         return
             $"OpenShock.SDK.CSharp.Live/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()}; " +
-            $"{entryAssemblyName.Name} {entryAssemblyVersion!.Major}.{entryAssemblyVersion.Minor}.{entryAssemblyVersion.Build})";
+            $"{programName} {programVersion}.{programVersion}.{programVersion})";
     }
 
 

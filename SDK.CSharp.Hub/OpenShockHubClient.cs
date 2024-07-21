@@ -11,6 +11,7 @@ namespace OpenShock.SDK.CSharp.Hub;
 
 public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 {
+    private HubClientOptions? _hubClientOptions;
     private bool _disposed = false;
 
     private HubConnection? _connection = null;
@@ -51,6 +52,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 
     public async ValueTask Setup(HubClientOptions hubClientOptions)
     {
+        _hubClientOptions = hubClientOptions;
         if (_connection != null) await _connection.DisposeAsync().ConfigureAwait(false);
 
         var url = new Uri(hubClientOptions.Server, "/1/hubs/user");
@@ -99,9 +101,18 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
         var signalRAssembly = typeof(HubConnection).Assembly;
         var signalRVersion = signalRAssembly.GetName().Version!;
 
-        var entryAssembly = Assembly.GetEntryAssembly();
-        var entryAssemblyName = entryAssembly!.GetName();
-        var entryAssemblyVersion = entryAssemblyName.Version;
+        string programName;
+        Version programVersion;
+        
+        if (_hubClientOptions?.Program == null)
+        {
+            (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
+        }
+        else
+        {
+            programName = _hubClientOptions.Program.Name;
+            programVersion = _hubClientOptions.Program.Version;
+        }
 
         var runtimeVersion = RuntimeInformation.FrameworkDescription;
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
@@ -109,7 +120,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
         return
             $"OpenShock.SDK.CSharp.Live/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()}; SignalR {signalRVersion.Major}.{signalRVersion.Minor}.{signalRVersion.Build}; " +
-            $"{entryAssemblyName.Name} {entryAssemblyVersion!.Major}.{entryAssemblyVersion.Minor}.{entryAssemblyVersion.Build})";
+            $"{programName} {programVersion!.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
 
     

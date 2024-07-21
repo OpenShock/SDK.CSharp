@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace OpenShock.SDK.CSharp.Utils;
 
@@ -12,4 +13,16 @@ public static class UserAgentUtils
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) return "Linux";
         return "Unknown OS";
     }
+    
+    public static (string programName, Version programVersion) GetAssemblyInfo()
+    {
+        var entryAssembly = Assembly.GetEntryAssembly();
+        if (entryAssembly == null) return UnknownAssemblyInfo;
+        var entryAssemblyName = entryAssembly.GetName();
+        if (string.IsNullOrWhiteSpace(entryAssemblyName.Name) || entryAssemblyName.Version == null) return UnknownAssemblyInfo;
+        
+        return (entryAssemblyName.Name, entryAssemblyName.Version);
+    }
+    
+    private static readonly (string, Version) UnknownAssemblyInfo = ("Unknown Assembly", new Version(0, 0, 0));
 }
