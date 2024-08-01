@@ -145,6 +145,32 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         };
     }
 
+    /// <inheritdoc />
+    public async Task<OneOf<Success<ResponseDeviceWithToken>, NotFound, UnauthenticatedError>> GetDevice(Guid deviceId, CancellationToken cancellationToken = default)
+    {
+        using var deviceResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.Get(deviceId), cancellationToken);
+
+        if (!deviceResponse.IsSuccess())
+        {
+            if (deviceResponse.IsProblem())
+            {
+                var problem =
+                    await deviceResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(default,
+                        JsonSerializerOptions);
+                
+                if (problem.Type == "Device.NotFound") return new NotFound();
+            }
+            
+            if (deviceResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+
+            throw new OpenShockApiError("Failed to get device by id", deviceResponse.StatusCode);
+        }
+
+        return new Success<ResponseDeviceWithToken>(
+            await deviceResponse.Content.ReadBaseResponseAsJsonAsync<ResponseDeviceWithToken>(cancellationToken,
+                JsonSerializerOptions));
+    }
+
     private string GetUserAgent()
     {
         var liveClientAssembly = GetType().Assembly;

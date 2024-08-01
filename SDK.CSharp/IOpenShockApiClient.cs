@@ -44,6 +44,14 @@ public interface IOpenShockApiClient
     /// <param name="controlRequest"></param>
     /// <returns></returns>
     public Task<OneOf<Success, ShockerNotFoundOrNoAccess, ShockerPaused, ShockerNoPermission, UnauthenticatedError>> ControlShocker(ControlRequest controlRequest);
+
+    /// <summary>
+    /// Get a device with its token if you have permissions
+    /// </summary>
+    /// <param name="deviceId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<OneOf<Success<ResponseDeviceWithToken>, NotFound, UnauthenticatedError>> GetDevice(Guid deviceId, CancellationToken cancellationToken = default);
 }
 
 public struct DeviceOffline;
