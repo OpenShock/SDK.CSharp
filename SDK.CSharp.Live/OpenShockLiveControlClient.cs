@@ -1,4 +1,6 @@
-﻿using System.Net.WebSockets;
+﻿using System.Collections.Concurrent;
+using System.ComponentModel.DataAnnotations;
+using System.Net.WebSockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -9,6 +11,7 @@ using OneOf;
 using OneOf.Types;
 using OpenShock.SDK.CSharp.Live.LiveControlModels;
 using OpenShock.SDK.CSharp.Live.Utils;
+using OpenShock.SDK.CSharp.Models;
 using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Updatables;
 using OpenShock.SDK.CSharp.Utils;
@@ -25,11 +28,48 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
     public string Gateway { get; }
     public Guid DeviceId { get; }
-    
+
     private readonly string _authToken;
     private readonly ILogger<OpenShockLiveControlClient> _logger;
     private readonly ApiClientOptions.ProgramInfo? _programInfo;
     private ClientWebSocket? _clientWebSocket = null;
+
+    private sealed class ShockerState
+    {
+        public ControlType LastType { get; set; } = ControlType.Stop;
+        [Range(0, 100)] public byte LastIntensity { get; set; } = 0;
+
+        /// <summary>
+        /// Active until time for the shocker, determined by client TPS interval + current time
+        /// </summary>
+        public DateTimeOffset ActiveUntil = DateTimeOffset.MinValue;
+    }
+
+    private Timer _managedFrameTimer;
+
+    private ConcurrentDictionary<Guid, ShockerState> _shockerStates = new();
+
+    private byte _tps = 0;
+
+    public byte Tps
+    {
+        get => _tps;
+        private set
+        {
+            _tps = value;
+
+            if (_tps == 0)
+            {
+                _managedFrameTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                return;
+            }
+
+            var interval = TimeSpan.FromMilliseconds(1000d / _tps);
+            _managedFrameTimer.Change(interval, interval);
+            _logger.LogDebug("Managed frame timer interval set {Tps} TPS / {Interval}ms interval", _tps,
+                interval.Milliseconds);
+        }
+    }
 
     public event Func<Task>? OnDeviceNotConnected;
     public event Func<Task>? OnDeviceConnected;
@@ -53,6 +93,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         _dispose = new CancellationTokenSource();
         _linked = _dispose;
+
+        _managedFrameTimer = new Timer(FrameTimerTick);
     }
 
     public Task InitializeAsync() => ConnectAsync();
@@ -155,7 +197,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         string programName;
         Version programVersion;
-        
+
         if (_programInfo == null)
         {
             (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
@@ -189,8 +231,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 }
 
                 var message =
-                    await JsonWebSocketUtils.ReceiveFullMessageAsyncNonAlloc<BaseResponse<LiveResponseType>>(
-                        _clientWebSocket, _linked.Token, JsonSerializerOptions);
+                    await JsonWebSocketUtils
+                        .ReceiveFullMessageAsyncNonAlloc<LiveControlModels.BaseResponse<LiveResponseType>>(
+                            _clientWebSocket, _linked.Token, JsonSerializerOptions);
 
                 if (message.IsT2)
                 {
@@ -263,7 +306,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     }
 
 
-    private async Task HandleMessage(BaseResponse<LiveResponseType>? wsRequest)
+    private async Task HandleMessage(LiveControlModels.BaseResponse<LiveResponseType>? wsRequest)
     {
         if (wsRequest == null) return;
         switch (wsRequest.ResponseType)
@@ -311,8 +354,82 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             case LiveResponseType.DeviceConnected:
                 await OnDeviceConnected.Raise();
                 break;
+
+            case LiveResponseType.TPS:
+                if (wsRequest.Data == null)
+                {
+                    _logger.LogWarning("TPS response data is null");
+                    return;
+                }
+
+                var tpsDataResponse = wsRequest.Data.Deserialize<TpsData>(JsonSerializerOptions);
+                if (tpsDataResponse == null)
+                {
+                    _logger.LogWarning("TPS response data failed to deserialize");
+                    return;
+                }
+
+                _logger.LogDebug("Received TPS: {Tps}", Tps);
+
+                Tps = tpsDataResponse.Client;
+                break;
         }
     }
+
+    private async void FrameTimerTick(object state)
+    {
+        try
+        {
+            if (_clientWebSocket is not { State: WebSocketState.Open })
+            {
+                _logger.LogWarning("Frame timer ticked, but websocket is not open");
+                _managedFrameTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                return;
+            }
+
+            await QueueMessage(new BaseRequest<LiveRequestType>()
+            {
+                RequestType = LiveRequestType.BulkFrame,
+                Data = _shockerStates.Where(x => x.Value.ActiveUntil > DateTimeOffset.UtcNow)
+                    .Select(x => new ClientLiveFrame
+                    {
+                        Shocker = x.Key,
+                        Type = x.Value.LastType,
+                        Intensity = x.Value.LastIntensity
+                    })
+            });
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Error in managed frame timer callback");
+        }
+    }
+    
+    /// <inheritdoc />
+    public void IntakeFrame(Guid shocker, ControlType type, byte intensity)
+    {
+        if (_tps == 0)
+        {
+            _logger.LogWarning("Intake frame called, but TPS is 0");
+            return;
+        }
+
+        var activeUntil = DateTimeOffset.UtcNow.AddMilliseconds(1000d / Tps * 2.5);
+
+        _shockerStates.AddOrUpdate(shocker, new ShockerState()
+        {
+            LastIntensity = intensity,
+            ActiveUntil = activeUntil,
+            LastType = type
+        }, (guid, shockerState) =>
+        {
+            shockerState.LastIntensity = intensity;
+            shockerState.ActiveUntil = activeUntil;
+            shockerState.LastType = type;
+            return shockerState;
+        });
+    }
+
 
     private bool _disposed = false;
 
@@ -360,13 +477,4 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private readonly AsyncUpdatableVariable<ulong> _latency = new(0);
 
     public IAsyncUpdatable<ulong> Latency => _latency;
-
-    public async Task SendFrame(ClientLiveFrame frame)
-    {
-        await QueueMessage(new BaseRequest<LiveRequestType>()
-        {
-            RequestType = LiveRequestType.Frame,
-            Data = frame
-        });
-    }
 }
