@@ -380,6 +380,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     {
         try
         {
+            if(_shockerStates.IsEmpty) return;
+            
             if (_clientWebSocket is not { State: WebSocketState.Open })
             {
                 _logger.LogWarning("Frame timer ticked, but websocket is not open");
@@ -387,16 +389,29 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 return;
             }
 
-            await QueueMessage(new BaseRequest<LiveRequestType>()
+            IList<ClientLiveFrame>? data = null;
+            
+            var cur = DateTimeOffset.UtcNow;
+            
+            foreach (var pair in _shockerStates)
+            {
+                if (pair.Value.ActiveUntil < cur ) continue;
+                data ??= new List<ClientLiveFrame>();
+
+                data.Add(new ClientLiveFrame
+                {
+                    Shocker = pair.Key,
+                    Type = pair.Value.LastType,
+                    Intensity = pair.Value.LastIntensity
+                });
+            }
+            
+            if (data == null) return;
+
+            await QueueMessage(new BaseRequest<LiveRequestType>
             {
                 RequestType = LiveRequestType.BulkFrame,
-                Data = _shockerStates.Where(x => x.Value.ActiveUntil > DateTimeOffset.UtcNow)
-                    .Select(x => new ClientLiveFrame
-                    {
-                        Shocker = x.Key,
-                        Type = x.Value.LastType,
-                        Intensity = x.Value.LastIntensity
-                    })
+                Data = data
             });
         }
         catch (Exception e)
