@@ -9,8 +9,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.24</AssemblyVersion>
-        <Version>0.0.24</Version>
+        <AssemblyVersion>0.0.25</AssemblyVersion>
+        <Version>0.0.25</Version>
         <Title>SDK.DotNet.Hub</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>

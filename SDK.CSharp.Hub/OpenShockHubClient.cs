@@ -59,6 +59,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
         var connectionBuilder = new HubConnectionBuilder()
             .WithUrl(url, HttpTransportType.WebSockets, options =>
             {
+                options.SkipNegotiation = true;
                 options.Headers.Add("OpenShockToken", hubClientOptions.Token);
                 options.Headers.Add("User-Agent", GetUserAgent());
             })
