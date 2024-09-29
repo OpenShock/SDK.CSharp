@@ -214,7 +214,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         return
             $"OpenShock.SDK.CSharp.Live/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()}; " +
-            $"{programName} {programVersion}.{programVersion}.{programVersion})";
+            $"{programName} {programVersion.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
 
 

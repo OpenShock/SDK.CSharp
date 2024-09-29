@@ -119,7 +119,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
 
         return
-            $"OpenShock.SDK.CSharp.Live/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
+            $"OpenShock.SDK.CSharp.Hub/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()}; SignalR {signalRVersion.Major}.{signalRVersion.Minor}.{signalRVersion.Build}; " +
             $"{programName} {programVersion!.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
