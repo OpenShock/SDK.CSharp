@@ -39,8 +39,8 @@ public class ProblemDetails
     public string? Detail { get; set; }
     
     /// <summary>
-    /// Trace Id for tracing the problem in the logs
+    /// Request Id for tracing the problem in the logs
     /// </summary>
-    [JsonPropertyName("traceId")]
-    public required string TraceId { get; set; } 
+    [JsonPropertyName("requestId")]
+    public required string RequestId { get; set; } 
 }

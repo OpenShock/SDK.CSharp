@@ -8,8 +8,8 @@
         <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
         <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.28</AssemblyVersion>
-        <Version>0.0.28</Version>
+        <AssemblyVersion>0.0.29</AssemblyVersion>
+        <Version>0.0.29</Version>
         <Title>SDK.DotNet.Live</Title>
         <Authors>OpenShock</Authors>
         <Description>Extension for OpenShock.SDK.CSharp</Description>
@@ -31,7 +31,7 @@
         <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
         <PackageReference Include="OneOf" Version="3.0.271" />
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.28" />
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.29" />
         <PackageReference Include="PolySharp" Version="1.14.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
