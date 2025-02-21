@@ -14,9 +14,9 @@ public interface IOpenShockLiveControlClient
 
     # region Events
 
-    public event Func<Task>? OnDispose;
-    public event Func<Task>? OnDeviceNotConnected;
-    public event Func<Task>? OnDeviceConnected;
+    public IAsyncObservable<Guid> OnHubNotConnected { get; }
+    public IAsyncObservable<Guid> OnHubConnected { get; }
+    public IAsyncObservable<Guid> OnDispose { get; }
 
     #endregion
 

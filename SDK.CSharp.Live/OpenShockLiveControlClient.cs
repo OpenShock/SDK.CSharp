@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Net.WebSockets;
+using System.Reactive.Subjects;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -45,9 +46,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         public DateTimeOffset ActiveUntil = DateTimeOffset.MinValue;
     }
 
-    private Timer _managedFrameTimer;
+    private readonly Timer _managedFrameTimer;
 
-    private ConcurrentDictionary<Guid, ShockerState> _shockerStates = new();
+    private readonly ConcurrentDictionary<Guid, ShockerState> _shockerStates = new();
 
     private byte _tps = 0;
 
@@ -71,9 +72,14 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
     }
 
-    public event Func<Task>? OnDeviceNotConnected;
-    public event Func<Task>? OnDeviceConnected;
-    public event Func<Task>? OnDispose;
+    public IAsyncObservable<Guid> OnHubNotConnected => _onDeviceNotConnected;
+    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDeviceNotConnected = new();
+    
+    public IAsyncObservable<Guid> OnHubConnected => _onDeviceConnected;
+    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDeviceConnected = new();
+    
+    public IAsyncObservable<Guid> OnDispose => _onDispose;
+    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDispose = new();
 
     private readonly CancellationTokenSource _dispose;
     private CancellationTokenSource _linked;
@@ -160,8 +166,10 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             _logger.LogInformation("Connected to websocket");
             _state.Value = WebsocketConnectionState.Connected;
 
+#pragma warning disable CS4014
             Run(ReceiveLoop, _linked.Token);
             Run(MessageLoop, _linked.Token);
+#pragma warning restore CS4014
 
             return new Success();
         }
@@ -171,7 +179,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             {
                 _logger.LogError("Device not found, shutting down");
                 _dispose.Dispose();
-                await OnDispose.Raise();
+#pragma warning disable CS4014
+                Run(async () => await _onDispose.OnNextAsync(DeviceId));
+#pragma warning restore CS4014
                 return new NotFound();
             }
 
@@ -186,7 +196,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         _clientWebSocket.Abort();
         _clientWebSocket.Dispose();
         await Task.Delay(3000, _dispose.Token);
+#pragma warning disable CS4014
         Run(ConnectAsync, _dispose.Token);
+#pragma warning restore CS4014
         return new Reconnecting();
     }
 
@@ -302,7 +314,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         await Task.Delay(3000, _dispose.Token);
 
+#pragma warning disable CS4014
         Run(ConnectAsync, _dispose.Token);
+#pragma warning restore CS4014
     }
 
 
@@ -349,10 +363,14 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 break;
 
             case LiveResponseType.DeviceNotConnected:
-                await OnDeviceNotConnected.Raise();
+#pragma warning disable CS4014
+                Run(async () => await _onDeviceNotConnected.OnNextAsync(DeviceId));
+#pragma warning restore CS4014
                 break;
             case LiveResponseType.DeviceConnected:
-                await OnDeviceConnected.Raise();
+#pragma warning disable CS4014
+                Run(async () => await _onDeviceConnected.OnNextAsync(DeviceId));
+#pragma warning restore CS4014
                 break;
 
             case LiveResponseType.TPS:
@@ -376,7 +394,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
     }
 
-    private async void FrameTimerTick(object state)
+    private async void FrameTimerTick(object? state)
     {
         try
         {
@@ -458,7 +476,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 #else
         _dispose.Cancel();
 #endif
-        await OnDispose.Raise();
+        await _onDispose.OnNextAsync(DeviceId);
         _clientWebSocket?.Dispose();
     }
 

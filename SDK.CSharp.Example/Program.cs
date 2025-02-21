@@ -7,7 +7,7 @@ using OpenShock.SDK.CSharp.Live;
 using OpenShock.SDK.CSharp.Models;
 using Serilog;
 
-const string apiToken = "HskLOwiz9gtFtFhDUcePSRMWfWVevnz5ciR5l6KBm0IHm4r2yMi86IkUqEYAkXa3";
+const string apiToken = "tMZYAGXjhPakqfHXCrasQlyrNVu9ROCZDdh6MauABgrcHcgY0uWt7z7gghwSOddx";
 var deviceId = Guid.Parse("bc849182-89e0-43ff-817b-32400be3f97d");
 
 var hostBuilder = Host.CreateDefaultBuilder();

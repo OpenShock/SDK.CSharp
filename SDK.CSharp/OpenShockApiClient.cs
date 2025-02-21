@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Collections.Immutable;
+using System.Net;
 using System.Net.Http.Json;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -44,7 +45,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     }
 
     /// <inheritdoc />
-    public async Task<OneOf<Success<IReadOnlyCollection<ResponseDeviceWithShockers>>, UnauthenticatedError>>
+    public async Task<OneOf<Success<ImmutableArray<ResponseDeviceWithShockers>>, UnauthenticatedError>>
         GetOwnShockers(CancellationToken cancellationToken = default)
     {
         using var ownShockersResponse =
@@ -56,9 +57,9 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
             throw new OpenShockApiError("Failed to get own shockers", ownShockersResponse.StatusCode);
         }
 
-        return new Success<IReadOnlyCollection<ResponseDeviceWithShockers>>(
+        return new Success<ImmutableArray<ResponseDeviceWithShockers>>(
             await ownShockersResponse.Content
-                .ReadBaseResponseAsJsonAsync<IReadOnlyCollection<ResponseDeviceWithShockers>>(cancellationToken,
+                .ReadBaseResponseAsJsonAsync<ImmutableArray<ResponseDeviceWithShockers>>(cancellationToken,
                     JsonSerializerOptions));
     }
 

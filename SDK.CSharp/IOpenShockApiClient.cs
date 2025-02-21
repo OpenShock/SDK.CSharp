@@ -1,4 +1,5 @@
-﻿using OneOf;
+﻿using System.Collections.Immutable;
+using OneOf;
 using OneOf.Types;
 using OpenShock.SDK.CSharp.Errors;
 using OpenShock.SDK.CSharp.Models;
@@ -12,7 +13,7 @@ public interface IOpenShockApiClient
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<OneOf<Success<IReadOnlyCollection<ResponseDeviceWithShockers>>, UnauthenticatedError>> GetOwnShockers(
+    public Task<OneOf<Success<ImmutableArray<ResponseDeviceWithShockers>>, UnauthenticatedError>> GetOwnShockers(
         CancellationToken cancellationToken = default);
 
     /// <summary>

@@ -1,37 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
+    <Import Project="../Shared.props" />
+    
     <PropertyGroup>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-        <TargetFrameworks>net8.0;netstandard2.1</TargetFrameworks>
-        <LangVersion>12</LangVersion>
         <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
         <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
-        <Company>OpenShock</Company>
-        <AssemblyVersion>0.0.29</AssemblyVersion>
-        <Version>0.0.29</Version>
         <Title>OpenShock.SDK.DotNet</Title>
-        <Authors>OpenShock</Authors>
-        <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>
-        <PackageProjectUrl>https://openshock.org</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/OpenShock/SDK.CSharp</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <PackageTags>openshock</PackageTags>
-        <Product>SDK.CSharp</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
-        <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
         <PackageId>OpenShock.SDK.CSharp</PackageId>
         <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="OneOf" Version="3.0.271"/>
-        <PackageReference Include="PolySharp" Version="1.14.1">
+        <PackageReference Include="PolySharp" Version="1.15.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="System.Reactive" Version="6.0.1" />
+        <PackageReference Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
 
     </ItemGroup>
 
@@ -40,8 +26,9 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-        <PackageReference Include="System.Text.Json" Version="8.0.4"/>
         <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0"/>
-        <PackageReference Include="System.Net.Http.Json" Version="8.0.0"/>
+        <PackageReference Include="System.Net.Http.Json" Version="9.0.2" />
+        <PackageReference Include="System.Text.Json" Version="9.0.2" />
+        <PackageReference Include="System.Collections.Immutable" Version="9.0.2" />
     </ItemGroup>
 </Project>
