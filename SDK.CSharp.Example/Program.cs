@@ -1,17 +1,15 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System.Collections.Immutable;
+using System.Text.Json;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using OpenShock.SDK.CSharp;
-using OpenShock.SDK.CSharp.Hub;
-using OpenShock.SDK.CSharp.Live;
-using OpenShock.SDK.CSharp.Models;
+using SDK.CSharp.Example;
 using Serilog;
-using Control = OpenShock.SDK.CSharp.Hub.Models.Control;
 
-const string apiToken = "";
-var deviceId = Guid.Parse("bc849182-89e0-43ff-817b-32400be3f97d");
 
-var hostBuilder = Host.CreateDefaultBuilder();
+var hostBuilder = Host.CreateApplicationBuilder();
 
 var loggerConfiguration = new LoggerConfiguration()
     .MinimumLevel.Verbose()
@@ -21,74 +19,57 @@ var loggerConfiguration = new LoggerConfiguration()
 
 Log.Logger = loggerConfiguration.CreateLogger();
 
-hostBuilder.UseSerilog(Log.Logger);
+hostBuilder.Logging.ClearProviders();
+hostBuilder.Logging.AddSerilog();
+
+var exampleType = typeof(IExample);
+typeof(Program).Assembly.GetTypes().Where(x => x.IsClass && x.IsAssignableTo(exampleType)).ToList().ForEach(x =>
+{
+    hostBuilder.Services.TryAddEnumerable(new ServiceDescriptor(exampleType, x, ServiceLifetime.Singleton));
+});
+
+var config = hostBuilder.Configuration.Get<ExampleConfig>()!;
+hostBuilder.Services.AddSingleton<ExampleConfig>(config);
+Console.WriteLine(JsonSerializer.Serialize(config, new JsonSerializerOptions { WriteIndented = true }));
 
 var host = hostBuilder.Build();
 
-var logger = host.Services.GetRequiredService<ILogger<Program>>();
-
-var apiClient = new OpenShockApiClient(new ApiClientOptions
+var console = new Thread(async () =>
 {
-    Token = apiToken
-});
+    Console.WriteLine("OpenShock Example Program...");
+    
+    var examples = host.Services.GetServices<IExample>().ToImmutableArray();
+    
+    Console.WriteLine($"Available Examples:");
 
-var shockers = await apiClient.GetOwnShockers();
-
-if (!shockers.IsT0)
-{
-    logger.LogError("Failed to get own shockers, make sure you used a valid api token");
-    return;
-}
-
-var apiSignalRHubClient = new OpenShockHubClient(new HubClientOptions
-{
-    Token = apiToken,
-    ConfigureLogging = builder => builder.AddSerilog(Log.Logger)
-});
-
-await apiSignalRHubClient.StartAsync();
-
-await apiSignalRHubClient.Control([
-    new Control
+    for (int i = 0; i < examples.Length; i++)
     {
-        Id = Guid.Parse("d9267ca6-d69b-4b7a-b482-c455f75a4408"),
-        Type = ControlType.Shock,
-        Intensity = 10,
-        Duration = 1000,
-        Exclusive = true
+        var example = examples[i];
+        Console.WriteLine($"[{i}] {example.GetType().Name}");
     }
-]);
 
-var gatewayRequest = await apiClient.GetDeviceGateway(deviceId);
+    while (true)
+    {
+        var input = Console.ReadLine();
+        if (!int.TryParse(input, out var choice))
+        {
+            Console.WriteLine("Invalid choice");
+            continue;
+        }
 
-if (gatewayRequest.IsT1)
-{
-    logger.LogError("Failed to get gateway, make sure you used a valid device id");
-    return;
-}
+        var example = examples[choice];
 
-if (gatewayRequest.IsT2)
-{
-    logger.LogError("Device is offline");
-    return;
-}
+        if (examples == null) Console.WriteLine("Invalid choice, example doesnt exist");
+        
+        Console.WriteLine($"Starting example {example.GetType().Name}");
+        
+        example.Start().Wait();
+    }
 
-if (gatewayRequest.IsT3)
-{
-    logger.LogError("Device is not connected to a gateway");
-    return;
-}
+});
 
-var gateway = gatewayRequest.AsT0.Value;
+console.IsBackground = true;
 
-logger.LogInformation("Device is connected to gateway {GatewayId} in region {Region}", gateway.Gateway, gateway.Country);
+console.Start();
 
-OpenShockLiveControlClient controlClient = new(gateway.Gateway, deviceId, apiToken, host.Services.GetRequiredService<ILogger<OpenShockLiveControlClient>>());
-await controlClient.InitializeAsync();
-
-while (true)
-{
-    Console.ReadLine();
-    controlClient.IntakeFrame(Guid.Parse("d9267ca6-d69b-4b7a-b482-c455f75a4408"), ControlType.Vibrate, 100);
-    Console.WriteLine("Sent frame");
-}
+await host.RunAsync();

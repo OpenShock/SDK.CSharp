@@ -190,7 +190,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         var problem = await pauseResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken, JsonSerializerOptions);
         if (problem.Type == "Shocker.NotFound") return new NotFound();
 
-        throw new OpenShockApiError("Failed to pause shocker", pauseResponse.StatusCode);
+        throw new OpenShockApiError("Failed to pause shocker", problem);
     }
 
     private string GetUserAgent()

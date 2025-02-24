@@ -61,7 +61,8 @@ public interface IOpenShockApiClient
     /// <param name="paused">True when the shocker needs to be paused</param>
     /// <param name="cancellationToken"></param>
     /// <returns>bool that indicates the current state of the shocker pause</returns>
-    public Task<OneOf<Success<bool>, NotFound>> PauseShocker(Guid shockerId, bool paused, CancellationToken cancellationToken = default);
+    public Task<OneOf<Success<bool>, NotFound>> PauseShocker(Guid shockerId, bool paused,
+        CancellationToken cancellationToken = default);
 }
 
 public struct DeviceOffline;
