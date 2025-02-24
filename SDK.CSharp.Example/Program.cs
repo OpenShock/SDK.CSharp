@@ -6,8 +6,9 @@ using OpenShock.SDK.CSharp.Hub;
 using OpenShock.SDK.CSharp.Live;
 using OpenShock.SDK.CSharp.Models;
 using Serilog;
+using Control = OpenShock.SDK.CSharp.Hub.Models.Control;
 
-const string apiToken = "tMZYAGXjhPakqfHXCrasQlyrNVu9ROCZDdh6MauABgrcHcgY0uWt7z7gghwSOddx";
+const string apiToken = "";
 var deviceId = Guid.Parse("bc849182-89e0-43ff-817b-32400be3f97d");
 
 var hostBuilder = Host.CreateDefaultBuilder();
@@ -46,6 +47,17 @@ var apiSignalRHubClient = new OpenShockHubClient(new HubClientOptions
 });
 
 await apiSignalRHubClient.StartAsync();
+
+await apiSignalRHubClient.Control([
+    new Control
+    {
+        Id = Guid.Parse("d9267ca6-d69b-4b7a-b482-c455f75a4408"),
+        Type = ControlType.Shock,
+        Intensity = 10,
+        Duration = 1000,
+        Exclusive = true
+    }
+]);
 
 var gatewayRequest = await apiClient.GetDeviceGateway(deviceId);
 

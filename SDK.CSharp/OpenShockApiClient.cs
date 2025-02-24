@@ -172,6 +172,27 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
                 JsonSerializerOptions));
     }
 
+    /// <inheritdoc />
+    public async Task<OneOf<Success<bool>, NotFound>> PauseShocker(Guid shockerId, bool paused, CancellationToken cancellationToken = default)
+    {
+        using var pauseResponse = await _httpClient.PostAsJsonAsync(
+            OpenShockEndpoints.V1.Shockers.Pause(shockerId),
+            new PauseRequest{ Pause = paused }, JsonSerializerOptions,
+            cancellationToken: cancellationToken);
+
+        if (pauseResponse.IsSuccess())
+            return new Success<bool>(
+                await pauseResponse.Content.ReadBaseResponseAsJsonAsync<bool>(cancellationToken,
+                    JsonSerializerOptions));
+        
+        if (!pauseResponse.IsProblem()) throw new OpenShockApiError("Failed to pause shocker", pauseResponse.StatusCode);
+            
+        var problem = await pauseResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken, JsonSerializerOptions);
+        if (problem.Type == "Shocker.NotFound") return new NotFound();
+
+        throw new OpenShockApiError("Failed to pause shocker", pauseResponse.StatusCode);
+    }
+
     private string GetUserAgent()
     {
         var liveClientAssembly = GetType().Assembly;
