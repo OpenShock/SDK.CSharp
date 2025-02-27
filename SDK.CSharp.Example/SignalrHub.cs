@@ -26,7 +26,7 @@ public sealed class SignalrHub : IExample
 
         
         
-        await apiSignalRHubClient.Control(_config.Shockers.Select(x => new OpenShock.SDK.CSharp.Hub.Models.Control
+        await apiSignalRHubClient.Control(_config.Shockers.Select(x => new Control
         {
             Id = x,
             Type = ControlType.Shock,

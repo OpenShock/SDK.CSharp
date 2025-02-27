@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using OpenShock.SDK.CSharp.Hub.Models;
+using OpenShock.SDK.CSharp.Models;
 
 namespace OpenShock.SDK.CSharp.Hub;
 

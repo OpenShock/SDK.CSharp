@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using OpenShock.SDK.CSharp.Hub.Models;
+using OpenShock.SDK.CSharp.Models;
 using OpenShock.SDK.CSharp.Serialization;
 using OpenShock.SDK.CSharp.Utils;
 
