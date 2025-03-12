@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
+using OpenShock.MinimalEvents;
 using OpenShock.SDK.CSharp.Hub.Models;
 using OpenShock.SDK.CSharp.Models;
 
@@ -15,27 +16,28 @@ public interface IOpenShockHubClient
     /// <summary>
     /// Log event handler
     /// </summary>
-    public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
+    public IAsyncMinimalEventObservable<LogEventArgs> OnLog { get; }
     
     /// <summary>
     /// Welcome event handler
     /// </summary>
-    public event Func<string, Task>? OnWelcome;
+    public IAsyncMinimalEventObservable<string> OnWelcome { get; }
     
     /// <summary>
     /// Whenever something about a device is updated
     /// </summary>
-    public event Func<Guid, DeviceUpdateType, Task>? OnDeviceUpdate;
+    public IAsyncMinimalEventObservable<HubUpdateEventArgs> OnHubUpdate { get; }
     
     /// <summary>
     /// Device online offline status updates
     /// </summary>
-    public event Func<IEnumerable<DeviceOnlineState>, Task>? OnDeviceStatus;
+    public IAsyncMinimalEventObservable<IReadOnlyList<DeviceOnlineState>> OnHubStatus { get; }
     
-    public event Func<Exception?, Task>? Reconnecting;
-    public event Func<Exception?, Task>? Closed;
-    public event Func<string?, Task>? Reconnected;
-    public event Func<string?, Task>? Connected;
+    public IAsyncMinimalEventObservable<string?> OnConnected { get; }
+    public IAsyncMinimalEventObservable<string?> OnReconnected { get; }
+    public IAsyncMinimalEventObservable<Exception?> OnReconnecting { get; }
+    public IAsyncMinimalEventObservable<Exception?> OnClosed { get; }
+    
     
     public HubConnectionState State { get; }
 
@@ -46,4 +48,16 @@ public interface IOpenShockHubClient
     /// <param name="customName"></param>
     /// <returns></returns>
     public Task Control(IEnumerable<Control> shocks, string? customName = null);
+}
+
+public struct HubUpdateEventArgs
+{
+    public required Guid HubId { get; init; }
+    public required DeviceUpdateType UpdateType { get; init; }
+}
+
+public struct LogEventArgs
+{
+    public required ControlLogSender Sender { get; init; }
+    public required IReadOnlyList<ControlLog> Logs { get; init; }
 }

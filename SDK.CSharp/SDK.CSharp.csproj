@@ -12,12 +12,11 @@
 
     <ItemGroup>
         <PackageReference Include="OneOf" Version="3.0.271"/>
+        <PackageReference Include="OpenShock.MinimalEvents" Version="0.0.1" />
         <PackageReference Include="PolySharp" Version="1.15.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="System.Reactive" Version="6.0.1" />
-        <PackageReference Include="System.Reactive.Async" Version="6.0.0-alpha.18" />
 
     </ItemGroup>
 

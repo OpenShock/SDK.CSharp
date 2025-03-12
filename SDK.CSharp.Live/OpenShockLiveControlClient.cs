@@ -1,8 +1,6 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel.DataAnnotations;
 using System.Net.WebSockets;
-using System.Reactive.Subjects;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -10,6 +8,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.Logging;
 using OneOf;
 using OneOf.Types;
+using OpenShock.MinimalEvents;
 using OpenShock.SDK.CSharp.Live.LiveControlModels;
 using OpenShock.SDK.CSharp.Live.Utils;
 using OpenShock.SDK.CSharp.Models;
@@ -72,14 +71,14 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
     }
 
-    public IAsyncObservable<Guid> OnHubNotConnected => _onDeviceNotConnected;
-    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDeviceNotConnected = new();
+    public IAsyncMinimalEventObservable OnHubNotConnected => _onDeviceNotConnected;
+    private readonly AsyncMinimalEvent _onDeviceNotConnected = new();
     
-    public IAsyncObservable<Guid> OnHubConnected => _onDeviceConnected;
-    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDeviceConnected = new();
+    public IAsyncMinimalEventObservable OnHubConnected => _onDeviceConnected;
+    private readonly AsyncMinimalEvent _onDeviceConnected = new();
     
-    public IAsyncObservable<Guid> OnDispose => _onDispose;
-    private readonly ConcurrentSimpleAsyncSubject<Guid> _onDispose = new();
+    public IAsyncMinimalEventObservable OnDispose => _onDispose;
+    private readonly AsyncMinimalEvent _onDispose = new();
 
     private readonly CancellationTokenSource _dispose;
     private CancellationTokenSource _linked;
@@ -180,7 +179,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 _logger.LogError("Device not found, shutting down");
                 _dispose.Dispose();
 #pragma warning disable CS4014
-                Run(async () => await _onDispose.OnNextAsync(DeviceId));
+                Run(async () => await _onDispose.InvokeAsyncParallel());
 #pragma warning restore CS4014
                 return new NotFound();
             }
@@ -364,12 +363,12 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
             case LiveResponseType.DeviceNotConnected:
 #pragma warning disable CS4014
-                Run(async () => await _onDeviceNotConnected.OnNextAsync(DeviceId));
+                Run(async () => await _onDeviceNotConnected.InvokeAsyncParallel());
 #pragma warning restore CS4014
                 break;
             case LiveResponseType.DeviceConnected:
 #pragma warning disable CS4014
-                Run(async () => await _onDeviceConnected.OnNextAsync(DeviceId));
+                Run(async () => await _onDeviceConnected.InvokeAsyncParallel());
 #pragma warning restore CS4014
                 break;
 
@@ -476,11 +475,11 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 #else
         _dispose.Cancel();
 #endif
-        await _onDispose.OnNextAsync(DeviceId);
         _clientWebSocket?.Dispose();
+        await _onDispose.InvokeAsyncParallel();
     }
 
-    public Task Run(Func<Task?> function, CancellationToken cancellationToken = default,
+    private Task Run(Func<Task?> function, CancellationToken cancellationToken = default,
         [CallerFilePath] string file = "",
         [CallerMemberName] string member = "", [CallerLineNumber] int line = -1)
         => Task.Run(function, cancellationToken).ContinueWith(
@@ -494,7 +493,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                     file.Substring(index + 1, file.Length - index - 1), member, line, t.Exception?.StackTrace);
             }, TaskContinuationOptions.OnlyOnFaulted);
 
-    public Task Run(Task? function, CancellationToken cancellationToken = default, [CallerFilePath] string file = "",
+    private Task Run(Task? function, CancellationToken cancellationToken = default, [CallerFilePath] string file = "",
         [CallerMemberName] string member = "", [CallerLineNumber] int line = -1)
         => Task.Run(() => function, cancellationToken).ContinueWith(
             t =>

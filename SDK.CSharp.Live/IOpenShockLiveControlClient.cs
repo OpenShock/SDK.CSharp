@@ -1,4 +1,5 @@
-﻿using OpenShock.SDK.CSharp.Live.LiveControlModels;
+﻿using OpenShock.MinimalEvents;
+using OpenShock.SDK.CSharp.Live.LiveControlModels;
 using OpenShock.SDK.CSharp.Models;
 using OpenShock.SDK.CSharp.Updatables;
 
@@ -8,15 +9,16 @@ public interface IOpenShockLiveControlClient
 {
     public string Gateway { get; }
     public Guid DeviceId { get; }
+    public byte Tps { get; }
     
     public IAsyncUpdatable<ulong> Latency { get; }
     public IAsyncUpdatable<WebsocketConnectionState> State { get; }
 
     # region Events
 
-    public IAsyncObservable<Guid> OnHubNotConnected { get; }
-    public IAsyncObservable<Guid> OnHubConnected { get; }
-    public IAsyncObservable<Guid> OnDispose { get; }
+    public IAsyncMinimalEventObservable OnHubNotConnected { get; }
+    public IAsyncMinimalEventObservable OnHubConnected { get; }
+    public IAsyncMinimalEventObservable OnDispose { get; }
 
     #endregion
 

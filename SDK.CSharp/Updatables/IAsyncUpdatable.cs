@@ -1,6 +1,9 @@
-﻿namespace OpenShock.SDK.CSharp.Updatables;
+﻿using OpenShock.MinimalEvents;
 
-public interface IAsyncUpdatable<out T> : IUpdatableBase<T>
+namespace OpenShock.SDK.CSharp.Updatables;
+
+public interface IAsyncUpdatable<out T>
 {
-    public event Func<T, Task>? OnValueChanged;
+    public T Value { get; }
+    public IAsyncMinimalEventObservable<T> Updated { get; }
 }

@@ -1,4 +1,4 @@
-﻿using OpenShock.SDK.CSharp.Utils;
+﻿using OpenShock.MinimalEvents;
 
 namespace OpenShock.SDK.CSharp.Updatables;
 
@@ -6,19 +6,22 @@ public sealed class AsyncUpdatableVariable<T>(T internalValue) : IAsyncUpdatable
 {
     public T Value
     {
-        get => internalValue;
+        get => _internalValue;
         set
         {
-            if (internalValue!.Equals(value)) return;
-            internalValue = value;
-            Task.Run(() => OnValueChanged?.Raise(value));
+            if (_internalValue!.Equals(value)) return;
+            _internalValue = value;
+            Task.Run(() => _updated.InvokeAsyncParallel(value));
         }
     }
-    
-    public event Func<T, Task>? OnValueChanged;
-    
+
+    public IAsyncMinimalEventObservable<T> Updated => _updated;
+    private readonly AsyncMinimalEvent<T> _updated = new();
+    private T _internalValue = internalValue;
+
+
     public void UpdateWithoutNotify(T newValue)
     {
-        internalValue = newValue;
+        _internalValue = newValue;
     }
 }

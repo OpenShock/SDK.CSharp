@@ -1,8 +1,8 @@
-﻿using System.Reflection;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
+using OpenShock.MinimalEvents;
 using OpenShock.SDK.CSharp.Hub.Models;
 using OpenShock.SDK.CSharp.Models;
 using OpenShock.SDK.CSharp.Serialization;
@@ -17,22 +17,42 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 
     private HubConnection? _connection = null;
 
+
     public async Task StartAsync()
     {
-        if(_connection != null) await _connection.StartAsync();
-        await Connected.Raise(_connection?.ConnectionId);
+        if (_connection != null) await _connection.StartAsync();
+        await _onConnected.InvokeAsyncParallel(_connection?.ConnectionId);
     }
 
-    public Task StopAsync() => _connection == null ? Task.CompletedTask : _connection.StopAsync();
-    public event Func<ControlLogSender, ICollection<ControlLog>, Task>? OnLog;
-    public event Func<string, Task>? OnWelcome;
-    public event Func<Guid, DeviceUpdateType, Task>? OnDeviceUpdate;
-    public event Func<IEnumerable<DeviceOnlineState>, Task>? OnDeviceStatus;
+    #region Events
 
-    public event Func<Exception?, Task>? Reconnecting;
-    public event Func<Exception?, Task>? Closed;
-    public event Func<string?, Task>? Reconnected;
-    public event Func<string?, Task>? Connected;
+    public IAsyncMinimalEventObservable<LogEventArgs> OnLog => _onLog;
+    private readonly AsyncMinimalEvent<LogEventArgs> _onLog = new();
+
+    public IAsyncMinimalEventObservable<string> OnWelcome => _onWelcome;
+    private readonly AsyncMinimalEvent<string> _onWelcome = new();
+
+    public IAsyncMinimalEventObservable<HubUpdateEventArgs> OnHubUpdate => _onHubUpdate;
+    private readonly AsyncMinimalEvent<HubUpdateEventArgs> _onHubUpdate = new();
+
+    public IAsyncMinimalEventObservable<IReadOnlyList<DeviceOnlineState>> OnHubStatus => _onHubStatus;
+    private readonly AsyncMinimalEvent<IReadOnlyList<DeviceOnlineState>> _onHubStatus = new();
+
+    public IAsyncMinimalEventObservable<string?> OnConnected => _onConnected;
+    private readonly AsyncMinimalEvent<string?> _onConnected = new();
+
+    public IAsyncMinimalEventObservable<string?> OnReconnected => _onReconnected;
+    private readonly AsyncMinimalEvent<string?> _onReconnected = new();
+
+    public IAsyncMinimalEventObservable<Exception?> OnReconnecting => _onReconnecting;
+    private readonly AsyncMinimalEvent<Exception?> _onReconnecting = new();
+
+    public IAsyncMinimalEventObservable<Exception?> OnClosed => _onClosed;
+    private readonly AsyncMinimalEvent<Exception?> _onClosed = new();
+
+    #endregion
+
+    public Task StopAsync() => _connection == null ? Task.CompletedTask : _connection.StopAsync();
 
     /// <summary>
     /// Creates a new instance of <see cref="OpenShockHubClient"/>
@@ -75,15 +95,25 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
             connectionBuilder.ConfigureLogging(hubClientOptions.ConfigureLogging);
 
         _connection = connectionBuilder.Build();
-        
-        _connection.Closed += Closed.Raise;
-        _connection.Reconnecting += Reconnecting.Raise;
-        _connection.Reconnected += Reconnected.Raise;
-        
-        _connection.On<ControlLogSender, ICollection<ControlLog>>("Log", OnLog.Raise);
-        _connection.On<string>("Welcome", OnWelcome.Raise);
-        _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", OnDeviceUpdate.Raise);
-        _connection.On<IEnumerable<DeviceOnlineState>>("DeviceStatus", OnDeviceStatus.Raise);
+
+        _connection.Closed += _onClosed.InvokeAsyncParallel;
+        _connection.Reconnecting += _onReconnecting.InvokeAsyncParallel;
+        _connection.Reconnected += _onReconnected.InvokeAsyncParallel;
+
+        _connection.On<ControlLogSender, IReadOnlyList<ControlLog>>("Log", (sender, logs) => _onLog.InvokeAsyncParallel(
+            new LogEventArgs
+            {
+                Sender = sender,
+                Logs = logs
+            }));
+        _connection.On<string>("Welcome", _onWelcome.InvokeAsyncParallel);
+        _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", (guid, type) => _onHubUpdate.InvokeAsyncParallel(
+            new HubUpdateEventArgs()
+            {
+                HubId = guid,
+                UpdateType = type
+            }));
+        _connection.On<IReadOnlyList<DeviceOnlineState>>("DeviceStatus", _onHubStatus.InvokeAsyncParallel);
     }
 
     public HubConnectionState State => _connection?.State ?? HubConnectionState.Disconnected;
@@ -105,7 +135,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
 
         string programName;
         Version programVersion;
-        
+
         if (_hubClientOptions?.Program == null)
         {
             (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
@@ -125,7 +155,7 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
             $"{programName} {programVersion!.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
 
-    
+
     public async ValueTask DisposeAsync()
     {
         if (_disposed) return;
