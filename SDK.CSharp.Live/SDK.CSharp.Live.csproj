@@ -7,7 +7,6 @@
         <Title>SDK.DotNet.Live</Title>
         <Product>SDK.CSharp.Live</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>

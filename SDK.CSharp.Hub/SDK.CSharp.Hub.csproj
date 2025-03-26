@@ -7,7 +7,6 @@
         <Title>SDK.DotNet.Hub</Title>
         <Product>SDK.CSharp.Hub</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>

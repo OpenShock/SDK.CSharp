@@ -7,7 +7,6 @@
         <Title>OpenShock.SDK.DotNet</Title>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageId>OpenShock.SDK.CSharp</PackageId>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
