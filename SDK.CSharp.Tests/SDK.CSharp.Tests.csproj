@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
 
@@ -14,7 +14,19 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="TUnit" Version="0.18.9" />
+        <PackageReference Include="TUnit" Version="0.19.10" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SDK.CSharp.Hub\SDK.CSharp.Hub.csproj" />
+      <ProjectReference Include="..\SDK.CSharp.Live\SDK.CSharp.Live.csproj" />
+      <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="ApiMockResponses\**">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

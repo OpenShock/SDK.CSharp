@@ -1,0 +1,51 @@
+{
+  "message": "",
+  "data": [
+    {
+      "shockers": [
+        {
+          "name": "Left Leg",
+          "isPaused": false,
+          "createdOn": "2023-03-08T04:11:12.657218Z",
+          "id": "d9267ca6-d69b-4b7a-b482-c455f75a4408",
+          "rfId": 1337,
+          "model": "CaiXianlin"
+        },
+        {
+          "name": "Right Arm",
+          "isPaused": false,
+          "createdOn": "2023-03-18T17:30:20.284606Z",
+          "id": "4d691479-7b34-4fbe-a7b4-fa2fdd765af3",
+          "rfId": 4202,
+          "model": "Petrainer998DR"
+        }
+      ],
+      "id": "bc849182-89e0-43ff-817b-32400be3f97d",
+      "name": "Main",
+      "createdOn": "2023-03-06T04:50:44.972741Z"
+    },
+    {
+      "shockers": [
+        {
+          "name": "👀 Debug Poggers",
+          "isPaused": false,
+          "createdOn": "2023-10-12T22:25:06.096132Z",
+          "id": "1c5fa273-8609-44ab-9084-90b533cf5010",
+          "rfId": 1337,
+          "model": "CaiXianlin"
+        },
+        {
+          "name": "Debug 2",
+          "isPaused": false,
+          "createdOn": "2024-01-29T16:47:29.779351Z",
+          "id": "500909ee-399e-45b8-a6cb-3933131bf80f",
+          "rfId": 1338,
+          "model": "Something unknown"
+        }
+      ],
+      "id": "4ff5880a-7899-4764-83e8-2afecaba0152",
+      "name": "Dev Stuffs",
+      "createdOn": "2023-09-23T20:04:49.025931Z"
+    }
+  ]
+}

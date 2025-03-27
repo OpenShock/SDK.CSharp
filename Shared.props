@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Company>OpenShock</Company>
         <Product>$(Company).$(MSBuildProjectName)</Product>
-        <Version>0.0.33</Version>
+        <Version>0.0.34</Version>
 
         <Authors>OpenShock</Authors>
         <Description>.NET / C# SDK for developing OpenShock applications. Used to interact with a OpenShock backend.</Description>

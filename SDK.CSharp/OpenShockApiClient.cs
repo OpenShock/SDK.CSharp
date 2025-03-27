@@ -16,7 +16,6 @@ namespace OpenShock.SDK.CSharp;
 
 public sealed class OpenShockApiClient : IOpenShockApiClient
 {
-    private readonly ApiClientOptions _apiClientOptions;
     private readonly HttpClient _httpClient;
 
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
@@ -32,16 +31,26 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     /// <param name="apiClientOptions">Options</param>
     public OpenShockApiClient(ApiClientOptions apiClientOptions)
     {
-        _apiClientOptions = apiClientOptions;
         _httpClient = new HttpClient
         {
             BaseAddress = apiClientOptions.Server,
             DefaultRequestHeaders =
             {
-                { "User-Agent", GetUserAgent() },
+                { "User-Agent", GetUserAgent(apiClientOptions) },
                 { "OpenShockToken", apiClientOptions.Token }
             }
         };
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OpenShockApiClient"/> class with a custom HttpClient.
+    /// You will need set everything yourself.
+    /// You probably want to use the other constructor, as this one primarily exists for testing purposes.
+    /// </summary>
+    /// <param name="httpClient"></param>
+    public OpenShockApiClient(HttpClient httpClient)
+    {
+        _httpClient = httpClient;
     }
 
     /// <inheritdoc />
@@ -134,7 +143,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
             throw new OpenShockApiError("Error from backend is not a problem response", controlResponse.StatusCode);
 
         var problem =
-            await controlResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(default,
+            await controlResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(CancellationToken.None,
                 JsonSerializerOptions);
 
         return problem.Type switch
@@ -156,7 +165,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
             if (deviceResponse.IsProblem())
             {
                 var problem =
-                    await deviceResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(default,
+                    await deviceResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(CancellationToken.None,
                         JsonSerializerOptions);
                 
                 if (problem.Type == "Device.NotFound") return new NotFound();
@@ -193,29 +202,29 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         throw new OpenShockApiError("Failed to pause shocker", problem);
     }
 
-    private string GetUserAgent()
+    private static string GetUserAgent(ApiClientOptions options)
     {
-        var liveClientAssembly = GetType().Assembly;
-        var liveClientVersion = liveClientAssembly.GetName().Version!;
+        var clientAssembly = typeof(OpenShockApiClient).Assembly;
+        var clientVersion = clientAssembly.GetName().Version!;
 
         string programName;
         Version programVersion;
 
-        if (_apiClientOptions.Program == null)
+        if (options.Program == null)
         {
             (programName, programVersion) = UserAgentUtils.GetAssemblyInfo();
         }
         else
         {
-            programName = _apiClientOptions.Program.Name;
-            programVersion = _apiClientOptions.Program.Version;
+            programName = options.Program.Name;
+            programVersion = options.Program.Version;
         }
 
         var runtimeVersion = RuntimeInformation.FrameworkDescription;
         if (string.IsNullOrEmpty(runtimeVersion)) runtimeVersion = "Unknown Runtime";
 
         return
-            $"OpenShock.SDK.CSharp/{liveClientVersion.Major}.{liveClientVersion.Minor}.{liveClientVersion.Build} " +
+            $"OpenShock.SDK.CSharp/{clientVersion.Major}.{clientVersion.Minor}.{clientVersion.Build} " +
             $"({runtimeVersion}; {UserAgentUtils.GetOs()};" +
             $" {programName} {programVersion.Major}.{programVersion.Minor}.{programVersion.Build})";
     }
