@@ -24,7 +24,7 @@
     <PropertyGroup>
         <TargetFrameworks>net8.0;net9.0;netstandard2.1</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
-        <LangVersion>13</LangVersion>
+        <LangVersion>Latest</LangVersion>
         <Nullable>enable</Nullable>
         <AssemblyName>$(Product)</AssemblyName>
         <RootNamespace>$(Product)</RootNamespace>

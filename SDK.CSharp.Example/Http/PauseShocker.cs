@@ -1,4 +1,7 @@
 ﻿using OpenShock.SDK.CSharp;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SDK.CSharp.Example.Http;
 

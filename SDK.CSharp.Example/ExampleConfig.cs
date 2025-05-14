@@ -1,4 +1,7 @@
-﻿namespace SDK.CSharp.Example;
+﻿using System;
+using System.Collections.Generic;
+
+namespace SDK.CSharp.Example;
 
 public sealed class ExampleConfig
 {

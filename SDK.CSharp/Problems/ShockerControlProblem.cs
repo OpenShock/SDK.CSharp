@@ -1,6 +1,4 @@
-﻿using System.Net;
-
-namespace OpenShock.SDK.CSharp.Problems;
+﻿namespace OpenShock.SDK.CSharp.Problems;
 
 public sealed class ShockerControlProblem : ProblemDetails
 {

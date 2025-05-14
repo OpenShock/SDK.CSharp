@@ -1,4 +1,6 @@
-﻿namespace SDK.CSharp.Tests;
+﻿using System.Threading.Tasks;
+
+namespace SDK.CSharp.Tests;
 
 public sealed class TestShockerEndpoints
 {
