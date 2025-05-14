@@ -2,10 +2,6 @@
     <Import Project="../Shared.props" />
 
     <PropertyGroup>
-        <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
-        <Title>SDK.DotNet.Hub</Title>
-        <Product>SDK.CSharp.Hub</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 

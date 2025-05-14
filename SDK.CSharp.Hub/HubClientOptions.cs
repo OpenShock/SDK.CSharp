@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging;
-using OpenShock.SDK.CSharp;
 
 namespace OpenShock.SDK.CSharp.Hub;
 

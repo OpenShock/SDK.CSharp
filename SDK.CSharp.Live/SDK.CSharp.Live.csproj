@@ -2,10 +2,6 @@
     <Import Project="../Shared.props" />
     
     <PropertyGroup>
-        <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
-        <Title>SDK.DotNet.Live</Title>
-        <Product>SDK.CSharp.Live</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 

@@ -1,6 +1,10 @@
-﻿using System.Net;
+﻿using System;
+using System.IO;
+using System.Net;
+using System.Net.Http;
 using System.Net.Mime;
 using System.Text;
+using System.Threading.Tasks;
 using OpenShock.SDK.CSharp;
 
 namespace SDK.CSharp.Tests;

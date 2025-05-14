@@ -2,6 +2,8 @@
 using OpenShock.SDK.CSharp;
 using OpenShock.SDK.CSharp.Live;
 using OpenShock.SDK.CSharp.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace SDK.CSharp.Example;
 
