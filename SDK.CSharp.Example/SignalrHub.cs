@@ -1,8 +1,6 @@
 ﻿using OpenShock.SDK.CSharp.Hub;
 using OpenShock.SDK.CSharp.Models;
 using Serilog;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace SDK.CSharp.Example;
 

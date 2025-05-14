@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace SDK.CSharp.Example;
+﻿namespace SDK.CSharp.Example;
 
 public interface IExample
 {
