@@ -10,17 +10,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.3" />
+        <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.5" />
         <PackageReference Include="PolySharp" Version="1.15.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.33" />
         <PackageReference Include="Semver" Version="3.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
