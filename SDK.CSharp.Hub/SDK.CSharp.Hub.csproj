@@ -2,10 +2,6 @@
     <Import Project="../Shared.props" />
 
     <PropertyGroup>
-        <AssemblyName>OpenShock.SDK.CSharp.Hub</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp.Hub</RootNamespace>
-        <Title>SDK.DotNet.Hub</Title>
-        <Product>SDK.CSharp.Hub</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
@@ -17,10 +13,6 @@
         </PackageReference>
         <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="0.0.33" />
         <PackageReference Include="Semver" Version="3.0.0" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">

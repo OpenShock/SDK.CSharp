@@ -2,10 +2,6 @@
     <Import Project="../Shared.props" />
     
     <PropertyGroup>
-        <AssemblyName>OpenShock.SDK.CSharp.Live</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp.Live</RootNamespace>
-        <Title>SDK.DotNet.Live</Title>
-        <Product>SDK.CSharp.Live</Product>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
@@ -18,10 +14,6 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Semver" Version="3.0.0" />
-    </ItemGroup>
-    
-    <ItemGroup>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
     
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">

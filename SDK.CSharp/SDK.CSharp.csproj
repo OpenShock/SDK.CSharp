@@ -2,11 +2,7 @@
     <Import Project="../Shared.props" />
     
     <PropertyGroup>
-        <AssemblyName>OpenShock.SDK.CSharp</AssemblyName>
-        <RootNamespace>OpenShock.SDK.CSharp</RootNamespace>
-        <Title>OpenShock.SDK.DotNet</Title>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <PackageId>OpenShock.SDK.CSharp</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
@@ -18,8 +14,6 @@
         </PackageReference>
 
     </ItemGroup>
-
-
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
         <PackageReference Include="System.Collections.Immutable" Version="9.0.3" />
