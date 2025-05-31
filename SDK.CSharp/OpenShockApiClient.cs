@@ -73,7 +73,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
 
     /// <inheritdoc />
     public async
-        Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, DeviceNotConnectedToGateway, UnauthenticatedError>>
+        Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, UnauthenticatedError>>
         GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default)
     {
         using var gatewayResponse =
@@ -98,7 +98,6 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         {
             "Device.NotFound" => new NotFound(),
             "Device.NotOnline" => new DeviceOffline(),
-            "Device.NotConnectedToGateway" => new DeviceNotConnectedToGateway(),
             _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", gatewayResponse.StatusCode)
         };
     }

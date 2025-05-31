@@ -22,8 +22,7 @@ public interface IOpenShockApiClient
     /// <param name="deviceId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, DeviceNotConnectedToGateway, UnauthenticatedError>>
-        GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default);
+    public Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, UnauthenticatedError>> GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the root for the API, this has some useful information and can be used to check if the API is reachable
@@ -66,5 +65,4 @@ public interface IOpenShockApiClient
 }
 
 public struct DeviceOffline;
-public struct DeviceNotConnectedToGateway;
 

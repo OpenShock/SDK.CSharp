@@ -112,12 +112,12 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
     public IAsyncUpdatable<WebsocketConnectionState> State => _state;
 
-    private async Task MessageLoop()
+    private async Task MessageLoop(CancellationToken cancellationToken)
     {
         try
         {
-            await foreach (var msg in _channel.Reader.ReadAllAsync(_linked.Token))
-                await JsonWebSocketUtils.SendFullMessage(msg, _clientWebSocket!, _linked.Token, JsonSerializerOptions);
+            await foreach (var msg in _channel.Reader.ReadAllAsync(cancellationToken))
+                await JsonWebSocketUtils.SendFullMessage(msg, _clientWebSocket!, cancellationToken, JsonSerializerOptions);
         }
         catch (OperationCanceledException)
         {
@@ -128,11 +128,11 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
     }
 
-    public struct Shutdown;
+    public readonly struct Shutdown;
 
-    public struct Reconnecting;
+    public  readonly struct Reconnecting;
 
-    private async Task<OneOf<Success, NotFound, Shutdown, Reconnecting>> ConnectAsync()
+    private async Task<OneOf<Success, Shutdown, Reconnecting>> ConnectAsync()
     {
         if (_dispose.IsCancellationRequested)
         {
@@ -141,13 +141,21 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         }
 
         _state.Value = WebsocketConnectionState.Connecting;
+        
 #if NETSTANDARD2_1
         _currentConnectionClose?.Cancel();
 #else
         if (_currentConnectionClose != null) await _currentConnectionClose.CancelAsync();
 #endif
+        
         _currentConnectionClose = new CancellationTokenSource();
+        
+        if (_linked != _dispose)
+        {
+            _linked.Dispose();
+        }
         _linked = CancellationTokenSource.CreateLinkedTokenSource(_dispose.Token, _currentConnectionClose.Token);
+        var cancellationToken = _linked.Token;
 
         _clientWebSocket?.Abort();
         _clientWebSocket?.Dispose();
@@ -160,31 +168,17 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         _logger.LogInformation("Connecting to websocket....");
         try
         {
-            await _clientWebSocket.ConnectAsync(new Uri($"wss://{Gateway}/1/ws/live/{DeviceId}"), _linked.Token);
+            await _clientWebSocket.ConnectAsync(new Uri($"wss://{Gateway}/1/ws/live/{DeviceId}"), cancellationToken);
 
             _logger.LogInformation("Connected to websocket");
             _state.Value = WebsocketConnectionState.Connected;
 
 #pragma warning disable CS4014
-            Run(ReceiveLoop, _linked.Token);
-            Run(MessageLoop, _linked.Token);
+            Run(ReceiveLoop(cancellationToken), cancellationToken);
+            Run(MessageLoop(cancellationToken), cancellationToken);
 #pragma warning restore CS4014
 
             return new Success();
-        }
-        catch (WebSocketException e)
-        {
-            if (e.Message.Contains("404"))
-            {
-                _logger.LogError("Device not found, shutting down");
-                _dispose.Dispose();
-#pragma warning disable CS4014
-                Run(async () => await _onDispose.InvokeAsyncParallel());
-#pragma warning restore CS4014
-                return new NotFound();
-            }
-
-            _logger.LogError(e, "Error while connecting, retrying in 3 seconds");
         }
         catch (Exception e)
         {
@@ -229,9 +223,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     }
 
 
-    private async Task ReceiveLoop()
+    private async Task ReceiveLoop(CancellationToken cancellationToken)
     {
-        while (!_linked.Token.IsCancellationRequested)
+        while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
@@ -244,7 +238,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 var message =
                     await JsonWebSocketUtils
                         .ReceiveFullMessageAsyncNonAlloc<LiveControlModels.BaseResponse<LiveResponseType>>(
-                            _clientWebSocket, _linked.Token, JsonSerializerOptions);
+                            _clientWebSocket, cancellationToken, JsonSerializerOptions);
 
                 if (message.IsT2)
                 {
@@ -257,7 +251,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                     try
                     {
                         await _clientWebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Normal close",
-                            _linked.Token);
+                            cancellationToken);
                     }
                     catch (OperationCanceledException e)
                     {
