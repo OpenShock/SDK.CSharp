@@ -55,11 +55,17 @@ public sealed class LiveControlDemo : IExample
         while (true)
         {
             Console.Write("\rHold down enter to continue to send vibrates%   ");
-            Console.ReadLine();
+            if (!string.IsNullOrEmpty(Console.ReadLine())) {
+                Console.WriteLine("Exiting vibrate loop.");
+                break;
+            }
+        
             foreach (var configShocker in _config.Shockers)
             {
                 liveControlClient.IntakeFrame(configShocker, ControlType.Vibrate, 50);
             }
         }
+
+        await liveControlClient.DisposeAsync();
     }
 }

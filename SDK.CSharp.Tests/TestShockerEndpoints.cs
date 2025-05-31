@@ -1,6 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using TUnit.Assertions;
+using TUnit.Core;
 
-namespace SDK.CSharp.Tests;
+namespace OpenShock.SDK.CSharp.Tests;
 
 public sealed class TestShockerEndpoints
 {
