@@ -7,8 +7,8 @@ namespace OpenShock.SDK.CSharp.Live;
 
 public interface IOpenShockLiveControlClient
 {
-    public string Gateway { get; }
-    public Guid DeviceId { get; }
+    public string? Gateway { get; }
+    public Guid HubId { get; }
     public byte Tps { get; }
     
     public IAsyncUpdatable<ulong> Latency { get; }

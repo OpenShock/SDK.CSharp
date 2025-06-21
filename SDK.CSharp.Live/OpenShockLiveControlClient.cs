@@ -20,14 +20,17 @@ namespace OpenShock.SDK.CSharp.Live;
 
 public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IAsyncDisposable
 {
+
+    private readonly OpenShockApiClient? _apiClient = null;
+
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
         Converters = { new CustomJsonStringEnumConverter() }
     };
-
-    public string Gateway { get; }
-    public Guid DeviceId { get; }
+    
+    public string? Gateway { get; } = null;
+    public Guid HubId { get; }
 
     private readonly string _authToken;
     private readonly ILogger<OpenShockLiveControlClient> _logger;
@@ -87,18 +90,43 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private Channel<BaseRequest<LiveRequestType>>
         _channel = Channel.CreateUnbounded<BaseRequest<LiveRequestType>>();
 
-    public OpenShockLiveControlClient(string gateway, Guid deviceId, string authToken,
-        ILogger<OpenShockLiveControlClient> logger, ApiClientOptions.ProgramInfo? programInfo = null)
+    /// <summary>
+    /// Provide a gateway to connect to
+    /// </summary>
+    /// <param name="gateway"></param>
+    /// <param name="hubId"></param>
+    /// <param name="authToken"></param>
+    /// <param name="logger"></param>
+    /// <param name="programInfo"></param>
+    public OpenShockLiveControlClient(string gateway, Guid hubId, string authToken,
+        ILogger<OpenShockLiveControlClient> logger, ApiClientOptions.ProgramInfo? programInfo = null) : this(hubId, authToken, logger, programInfo)
     {
         Gateway = gateway;
-        DeviceId = deviceId;
-        _authToken = authToken;
+    }
+
+    /// <summary>
+    /// Just provide the hub ID and a pre-configured api client to get the gateway automatically on every connection attempt.
+    /// </summary>
+    /// <param name="hubId"></param>
+    /// <param name="authToken"></param>
+    /// <param name="apiClient"></param>
+    /// <param name="logger"></param>
+    /// <param name="programInfo"></param>
+    public OpenShockLiveControlClient(Guid hubId, string authToken, OpenShockApiClient apiClient, ILogger<OpenShockLiveControlClient> logger, ApiClientOptions.ProgramInfo? programInfo = null) : this(hubId, authToken, logger, programInfo)
+    {
+        _apiClient = apiClient;
+    }
+
+    private OpenShockLiveControlClient(Guid hubId, string authToken, ILogger<OpenShockLiveControlClient> logger,
+        ApiClientOptions.ProgramInfo? programInfo = null)
+    {
         _logger = logger;
         _programInfo = programInfo;
-
+        HubId = hubId;
         _dispose = new CancellationTokenSource();
         _linked = _dispose;
-
+        _authToken = authToken;
+        
         _managedFrameTimer = new Timer(FrameTimerTick);
     }
 
@@ -168,7 +196,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         _logger.LogInformation("Connecting to websocket....");
         try
         {
-            await _clientWebSocket.ConnectAsync(new Uri($"wss://{Gateway}/1/ws/live/{DeviceId}"), cancellationToken);
+            await _clientWebSocket.ConnectAsync(new Uri($"wss://{Gateway}/1/ws/live/{HubId}"), cancellationToken);
 
             _logger.LogInformation("Connected to websocket");
             _state.Value = WebsocketConnectionState.Connected;
