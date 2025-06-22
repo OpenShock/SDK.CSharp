@@ -96,7 +96,9 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
 
         return problem.Type switch
         {
+            "Device.NotFound" => new NotFound(),
             "Hub.NotFound" => new NotFound(),
+            "Device.NotOnline" => new HubOffline(),
             "Hub.NotOnline" => new HubOffline(),
             _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", gatewayResponse.StatusCode)
         };
@@ -166,7 +168,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
                     await hubResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(CancellationToken.None,
                         JsonSerializerOptions);
                 
-                if (problem.Type == "Hub.NotFound") return new NotFound();
+                if (problem.Type is "Hub.NotFound" or "Device.NotFound") return new NotFound();
             }
             
             if (hubResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
