@@ -4,7 +4,7 @@ using Semver;
 
 namespace OpenShock.SDK.CSharp.Hub.Models;
 
-public sealed class DeviceOnlineState
+public sealed class HubOnlineState
 {
     public required Guid Device { get; set; }
     public required bool Online { get; set; }

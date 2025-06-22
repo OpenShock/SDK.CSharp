@@ -1,6 +1,6 @@
 ﻿namespace OpenShock.SDK.CSharp.Models;
 
-public class ResponseDevice
+public class ResponseHub
 {
     public required Guid Id { get; set; }
     public required string Name { get; set; }

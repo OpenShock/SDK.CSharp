@@ -9,20 +9,20 @@ namespace OpenShock.SDK.CSharp;
 public interface IOpenShockApiClient
 {
     /// <summary>
-    /// Get own shockers with devices
+    /// Get own shockers with hubs
     /// </summary>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<OneOf<Success<ImmutableArray<ResponseDeviceWithShockers>>, UnauthenticatedError>> GetOwnShockers(
+    public Task<OneOf<Success<ImmutableArray<ResponseHubWithShockers>>, UnauthenticatedError>> GetOwnShockers(
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Get the gateway a device is connected to
+    /// Get the gateway a hub is connected to
     /// </summary>
-    /// <param name="deviceId"></param>
+    /// <param name="hubId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, UnauthenticatedError>> GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default);
+    public Task<OneOf<Success<LcgResponse>, NotFound, HubOffline, UnauthenticatedError>> GetHubGateway(Guid hubId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Gets the root for the API, this has some useful information and can be used to check if the API is reachable
@@ -46,12 +46,12 @@ public interface IOpenShockApiClient
     public Task<OneOf<Success, ShockerNotFoundOrNoAccess, ShockerPaused, ShockerNoPermission, UnauthenticatedError>> ControlShocker(ControlRequest controlRequest);
 
     /// <summary>
-    /// Get a device with its token if you have permissions
+    /// Get a hub with its token if you have permissions
     /// </summary>
-    /// <param name="deviceId"></param>
+    /// <param name="hubId"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<OneOf<Success<ResponseDeviceWithToken>, NotFound, UnauthenticatedError>> GetDevice(Guid deviceId, CancellationToken cancellationToken = default);
+    public Task<OneOf<Success<ResponseHubWithToken>, NotFound, UnauthenticatedError>> GetHub(Guid hubId, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Pause or unpause a shocker
@@ -64,5 +64,5 @@ public interface IOpenShockApiClient
         CancellationToken cancellationToken = default);
 }
 
-public struct DeviceOffline;
+public struct HubOffline;
 

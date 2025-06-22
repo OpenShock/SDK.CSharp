@@ -35,8 +35,8 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
     public IAsyncMinimalEventObservable<HubUpdateEventArgs> OnHubUpdate => _onHubUpdate;
     private readonly AsyncMinimalEvent<HubUpdateEventArgs> _onHubUpdate = new();
 
-    public IAsyncMinimalEventObservable<IReadOnlyList<DeviceOnlineState>> OnHubStatus => _onHubStatus;
-    private readonly AsyncMinimalEvent<IReadOnlyList<DeviceOnlineState>> _onHubStatus = new();
+    public IAsyncMinimalEventObservable<IReadOnlyList<HubOnlineState>> OnHubStatus => _onHubStatus;
+    private readonly AsyncMinimalEvent<IReadOnlyList<HubOnlineState>> _onHubStatus = new();
 
     public IAsyncMinimalEventObservable<string?> OnConnected => _onConnected;
     private readonly AsyncMinimalEvent<string?> _onConnected = new();
@@ -107,13 +107,13 @@ public class OpenShockHubClient : IOpenShockHubClient, IAsyncDisposable
                 Logs = logs
             }));
         _connection.On<string>("Welcome", _onWelcome.InvokeAsyncParallel);
-        _connection.On<Guid, DeviceUpdateType>("DeviceUpdate", (guid, type) => _onHubUpdate.InvokeAsyncParallel(
+        _connection.On<Guid, HubUpdateType>("DeviceUpdate", (guid, type) => _onHubUpdate.InvokeAsyncParallel(
             new HubUpdateEventArgs()
             {
                 HubId = guid,
                 UpdateType = type
             }));
-        _connection.On<IReadOnlyList<DeviceOnlineState>>("DeviceStatus", _onHubStatus.InvokeAsyncParallel);
+        _connection.On<IReadOnlyList<HubOnlineState>>("DeviceStatus", _onHubStatus.InvokeAsyncParallel);
     }
 
     public HubConnectionState State => _connection?.State ?? HubConnectionState.Disconnected;

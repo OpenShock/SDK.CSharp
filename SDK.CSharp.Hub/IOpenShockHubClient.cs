@@ -24,14 +24,14 @@ public interface IOpenShockHubClient
     public IAsyncMinimalEventObservable<string> OnWelcome { get; }
     
     /// <summary>
-    /// Whenever something about a device is updated
+    /// Whenever something about a hub is updated
     /// </summary>
     public IAsyncMinimalEventObservable<HubUpdateEventArgs> OnHubUpdate { get; }
     
     /// <summary>
-    /// Device online offline status updates
+    /// Hub online offline status updates
     /// </summary>
-    public IAsyncMinimalEventObservable<IReadOnlyList<DeviceOnlineState>> OnHubStatus { get; }
+    public IAsyncMinimalEventObservable<IReadOnlyList<HubOnlineState>> OnHubStatus { get; }
     
     public IAsyncMinimalEventObservable<string?> OnConnected { get; }
     public IAsyncMinimalEventObservable<string?> OnReconnected { get; }
@@ -53,7 +53,7 @@ public interface IOpenShockHubClient
 public struct HubUpdateEventArgs
 {
     public required Guid HubId { get; init; }
-    public required DeviceUpdateType UpdateType { get; init; }
+    public required HubUpdateType UpdateType { get; init; }
 }
 
 public struct LogEventArgs

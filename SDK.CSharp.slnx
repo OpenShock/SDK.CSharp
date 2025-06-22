@@ -1,0 +1,7 @@
+﻿<Solution>
+  <Project Path="SDK.CSharp.Example\SDK.CSharp.Example.csproj" Type="Classic C#" />
+  <Project Path="SDK.CSharp.Hub\SDK.CSharp.Hub.csproj" Type="Classic C#" />
+  <Project Path="SDK.CSharp.Live\SDK.CSharp.Live.csproj" Type="Classic C#" />
+  <Project Path="SDK.CSharp.Tests\SDK.CSharp.Tests.csproj" Type="Classic C#" />
+  <Project Path="SDK.CSharp\SDK.CSharp.csproj" Type="Classic C#" />
+</Solution>

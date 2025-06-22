@@ -1,6 +1,6 @@
 ﻿namespace OpenShock.SDK.CSharp.Models;
 
-public sealed class ResponseDeviceWithShockers : ResponseDevice
+public sealed class ResponseHubWithShockers : ResponseHub
 {
     public required IEnumerable<ShockerResponse> Shockers { get; set; }
 }

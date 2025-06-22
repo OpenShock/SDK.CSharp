@@ -53,7 +53,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     }
 
     /// <inheritdoc />
-    public async Task<OneOf<Success<ImmutableArray<ResponseDeviceWithShockers>>, UnauthenticatedError>>
+    public async Task<OneOf<Success<ImmutableArray<ResponseHubWithShockers>>, UnauthenticatedError>>
         GetOwnShockers(CancellationToken cancellationToken = default)
     {
         using var ownShockersResponse =
@@ -65,19 +65,19 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
             throw new OpenShockApiError("Failed to get own shockers", ownShockersResponse.StatusCode);
         }
 
-        return new Success<ImmutableArray<ResponseDeviceWithShockers>>(
+        return new Success<ImmutableArray<ResponseHubWithShockers>>(
             await ownShockersResponse.Content
-                .ReadBaseResponseAsJsonAsync<ImmutableArray<ResponseDeviceWithShockers>>(cancellationToken,
+                .ReadBaseResponseAsJsonAsync<ImmutableArray<ResponseHubWithShockers>>(cancellationToken,
                     JsonSerializerOptions));
     }
 
     /// <inheritdoc />
     public async
-        Task<OneOf<Success<LcgResponse>, NotFound, DeviceOffline, UnauthenticatedError>>
-        GetDeviceGateway(Guid deviceId, CancellationToken cancellationToken = default)
+        Task<OneOf<Success<LcgResponse>, NotFound, HubOffline, UnauthenticatedError>>
+        GetHubGateway(Guid hubId, CancellationToken cancellationToken = default)
     {
         using var gatewayResponse =
-            await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.GetGateway(deviceId), cancellationToken);
+            await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.GetGateway(hubId), cancellationToken);
         if (gatewayResponse.IsSuccess())
         {
             return new Success<LcgResponse>(
@@ -96,8 +96,8 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
 
         return problem.Type switch
         {
-            "Device.NotFound" => new NotFound(),
-            "Device.NotOnline" => new DeviceOffline(),
+            "Hub.NotFound" => new NotFound(),
+            "Hub.NotOnline" => new HubOffline(),
             _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", gatewayResponse.StatusCode)
         };
     }
@@ -154,28 +154,28 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     }
 
     /// <inheritdoc />
-    public async Task<OneOf<Success<ResponseDeviceWithToken>, NotFound, UnauthenticatedError>> GetDevice(Guid deviceId, CancellationToken cancellationToken = default)
+    public async Task<OneOf<Success<ResponseHubWithToken>, NotFound, UnauthenticatedError>> GetHub(Guid hubId, CancellationToken cancellationToken = default)
     {
-        using var deviceResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.Get(deviceId), cancellationToken);
+        using var hubResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Devices.Get(hubId), cancellationToken);
 
-        if (!deviceResponse.IsSuccess())
+        if (!hubResponse.IsSuccess())
         {
-            if (deviceResponse.IsProblem())
+            if (hubResponse.IsProblem())
             {
                 var problem =
-                    await deviceResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(CancellationToken.None,
+                    await hubResponse.Content.ReadAsJsonAsync<ShockerControlProblem>(CancellationToken.None,
                         JsonSerializerOptions);
                 
-                if (problem.Type == "Device.NotFound") return new NotFound();
+                if (problem.Type == "Hub.NotFound") return new NotFound();
             }
             
-            if (deviceResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+            if (hubResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
 
-            throw new OpenShockApiError("Failed to get device by id", deviceResponse.StatusCode);
+            throw new OpenShockApiError("Failed to get hub by id", hubResponse.StatusCode);
         }
 
-        return new Success<ResponseDeviceWithToken>(
-            await deviceResponse.Content.ReadBaseResponseAsJsonAsync<ResponseDeviceWithToken>(cancellationToken,
+        return new Success<ResponseHubWithToken>(
+            await hubResponse.Content.ReadBaseResponseAsJsonAsync<ResponseHubWithToken>(cancellationToken,
                 JsonSerializerOptions));
     }
 

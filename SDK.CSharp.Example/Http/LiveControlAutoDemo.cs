@@ -5,17 +5,16 @@ using OpenShock.SDK.CSharp.Models;
 
 namespace SDK.CSharp.Example.Http;
 
-public sealed class LiveControlDemo : IExample
+public sealed class LiveControlAutoDemo : IExample
 {
     private readonly ExampleConfig _config;
     private readonly ILoggerFactory _loggerFactory;
 
-    public LiveControlDemo(ExampleConfig config, ILoggerFactory loggerFactory)
+    public LiveControlAutoDemo(ExampleConfig config, ILoggerFactory loggerFactory)
     {
         _config = config;
         _loggerFactory = loggerFactory;
     }
-
 
     public async Task Start()
     {
@@ -29,26 +28,8 @@ public sealed class LiveControlDemo : IExample
             Console.WriteLine("No hub configured, skipping live control demo.");
             return;
         }
-
-        var gateway = await apiClient.GetHubGateway(_config.Hub.Value);
         
-       gateway.Switch(success => {},
-           found =>
-           {
-               Console.WriteLine($"Hub with ID {_config.Hub.Value} not found.");
-           },
-           offline =>
-           {
-               Console.WriteLine($"Hub with ID {_config.Hub.Value} is not online.");
-           },
-           unauthenticated =>
-           {
-               Console.WriteLine($"not authenticated");
-           });
-       
-       if(!gateway.IsT0) throw new Exception("Failed to get gateway for hub " + _config.Hub.Value);
-        
-        var liveControlClient = new OpenShockLiveControlClient(gateway.AsT0.Value.Gateway, _config.Hub.Value, _config.ApiToken, _loggerFactory);
+        var liveControlClient = new OpenShockLiveControlClient(_config.Hub.Value, _config.ApiToken, apiClient, _loggerFactory);
 
         await using var stateSub = await liveControlClient.State.Updated.SubscribeAsync(async state => Console.WriteLine("Live control client state updated: " + state));
         liveControlClient.Start();
