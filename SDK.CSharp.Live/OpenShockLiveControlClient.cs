@@ -182,7 +182,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private WebsocketClientOptions GetWebsocketOptions(string authToken, ApiClientOptions.ProgramInfo? programInfo,
         IEnumerable<KeyValuePair<string, string>>? headers, ILogger? logger)
     {
-        var options = new WebsocketClientOptions()
+        var options = new WebsocketClientOptions
         {
             JsonSerializerOptions = JsonSerializerOptions,
             Headers =
@@ -190,7 +190,8 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
                 { "OpenShockToken", authToken },
                 { "User-Agent", GetUserAgent(programInfo) }
             },
-            Logger = logger
+            Logger = logger,
+            ReconnectPolicy = new LiveControlReconnectionPolicy()
         };
         if (headers is null) return options;
         
