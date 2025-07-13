@@ -31,7 +31,11 @@ public sealed class LiveControlAutoDemo : IExample
         
         var liveControlClient = new OpenShockLiveControlClient(_config.Hub.Value, _config.ApiToken, apiClient, _loggerFactory);
 
-        await using var stateSub = await liveControlClient.State.Updated.SubscribeAsync(async state => Console.WriteLine("Live control client state updated: " + state));
+        await using var stateSub = await liveControlClient.State.Updated.SubscribeAsync(state =>
+        {
+            Console.WriteLine($"Live control client state updated: {state}");
+            return Task.CompletedTask;
+        });
         liveControlClient.Start();
 
         while (true)

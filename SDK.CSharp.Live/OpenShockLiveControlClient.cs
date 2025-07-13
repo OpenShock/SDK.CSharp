@@ -34,7 +34,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     private readonly ILogger<OpenShockLiveControlClient>? _logger;
 
     private readonly JsonWebsocketClient<LiveControlModels.BaseResponse<LiveResponseType>, BaseRequest<LiveRequestType>>
-        _jsonWebsocketClient;
+        _jsonWebsocketClient = null!;
 
     private sealed class ShockerState
     {
@@ -428,7 +428,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
             }, TaskContinuationOptions.OnlyOnFaulted);
 
     private readonly AsyncUpdatableVariable<ulong> _latency = new(0);
-    private readonly IAsyncDisposable _onMessageSubscription;
+    private readonly IAsyncDisposable _onMessageSubscription = null!;
 
     public IAsyncUpdatable<ulong> Latency => _latency;
 }

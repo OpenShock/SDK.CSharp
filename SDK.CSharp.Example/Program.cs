@@ -34,7 +34,7 @@ Console.WriteLine(JsonSerializer.Serialize(config, new JsonSerializerOptions { W
 
 var host = hostBuilder.Build();
 
-var console = new Thread(async () =>
+var console = new Thread(() =>
 {
     Console.WriteLine("OpenShock Example Program...");
     
@@ -66,9 +66,10 @@ var console = new Thread(async () =>
         example.Start().Wait();
     }
 
-});
-
-console.IsBackground = true;
+})
+{
+    IsBackground = true
+};
 
 console.Start();
 

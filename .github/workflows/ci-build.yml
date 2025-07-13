@@ -19,6 +19,8 @@
         default: false
   workflow_dispatch:
 
+name: ci-build
+
 env:
   DOTNET_VERSION: 9.0.x
 
