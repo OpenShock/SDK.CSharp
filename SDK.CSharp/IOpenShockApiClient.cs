@@ -62,6 +62,13 @@ public interface IOpenShockApiClient
     /// <returns>bool that indicates the current state of the shocker pause</returns>
     public Task<OneOf<Success<bool>, NotFound>> PauseShocker(Guid shockerId, bool paused,
         CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Get information about the current token we are using for authentication.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns>Unauthenticated error occurs when we are unauthenticated but also when we are not a API Token scope.</returns>
+    public Task<OneOf<Success<TokenResponse>, UnauthenticatedError>> GetTokenSelf(CancellationToken cancellationToken = default);
 }
 
 public struct HubOffline;

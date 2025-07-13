@@ -23,6 +23,11 @@ public static class OpenShockEndpoints
         {
             public const string Self = "1/users/self";
         }
+
+        public static class Tokens
+        {
+            public const string Self = "1/tokens/self";
+        }
     }
 
     public static class V2

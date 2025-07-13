@@ -2,7 +2,7 @@
     <PropertyGroup>
         <Company>OpenShock</Company>
         <Product>$(Company).$(MSBuildProjectName)</Product>
-        <Version>0.0.38</Version>
+        <Version>0.0.39</Version>
 
         <Title>$(Product)</Title>
         <Authors>OpenShock</Authors>

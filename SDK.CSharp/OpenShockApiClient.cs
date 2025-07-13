@@ -20,7 +20,7 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     private static readonly JsonSerializerOptions JsonSerializerOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        Converters = { new CustomJsonStringEnumConverter() }
+        Converters = { new PermissionTypeConverter(), new CustomJsonStringEnumConverter() }
     };
 
 
@@ -200,6 +200,26 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
         if (problem.Type == "Shocker.NotFound") return new NotFound();
 
         throw new OpenShockApiError("Failed to pause shocker", problem);
+    }
+
+    /// <inheritdoc />
+    public async Task<OneOf<Success<TokenResponse>, UnauthenticatedError>> GetTokenSelf(CancellationToken cancellationToken = default)
+    {
+        using var tokenResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Tokens.Self, cancellationToken);
+        
+        if (tokenResponse.IsSuccess())
+        {
+            var tokenResponseObject = await tokenResponse.Content.ReadAsJsonAsync<TokenResponse>(cancellationToken, JsonSerializerOptions);
+            return new Success<TokenResponse>(tokenResponseObject);
+        }
+        
+        if (tokenResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+        
+        if (!tokenResponse.IsProblem()) throw new OpenShockApiError("Failed to get token self", tokenResponse.StatusCode);
+            
+        var problem = await tokenResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken, JsonSerializerOptions);
+
+        throw new OpenShockApiError("Failed to get token self", problem);
     }
 
     private static string GetUserAgent(ApiClientOptions options)
