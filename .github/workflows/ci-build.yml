@@ -1,24 +1,30 @@
-on:
+﻿on:
   push:
     branches:
-      - '*'
+      - '**'
   pull_request:
     branches:
-      - master
-      - develop
-    types: [opened, reopened, synchronize]
+      - '**'
+    types: [ opened, reopened, synchronize ]
   workflow_call:
+    inputs:
+      platforms:
+        description: 'Platforms to build for'
+        required: false
+        type: string
+      latest:
+        description: 'Tag image as latest'
+        required: false
+        type: boolean
+        default: false
   workflow_dispatch:
-
-name: ci-build
 
 env:
   DOTNET_VERSION: 9.0.x
-  REGISTRY: ghcr.io
 
 jobs:
 
-  build:
+  build-sdk:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,22 +36,34 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Install dependencies
-        run: dotnet restore -p:Configuration=Release
+      - name: Build Base
+        run: dotnet build -c Release SDK.CSharp/SDK.CSharp.csproj
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Pack Base
+        run: dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp/SDK.CSharp.csproj
 
-      - name: Test
-        run: dotnet test --no-restore --verbosity normal
+      - name: Add local package source
+        run: |
+          dotnet nuget add source $(pwd)/nupkg --name LocalPackages
+          
+      - name: Build Hub Extension
+        run: dotnet build -c Release SDK.CSharp.Hub/SDK.CSharp.Hub.csproj
 
+      - name: Pack Hub Extension
+        run: dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp.Hub/SDK.CSharp.Hub.csproj
+          
+      - name: Build Live Extension
+        run: dotnet build -c Release SDK.CSharp.Live/SDK.CSharp.Live.csproj
+
+      - name: Pack Live Extension
+        run: dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp.Live/SDK.CSharp.Live.csproj
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: Package
           path: |
-            ./**/bin/Release/*.nupkg
-            ./**/bin/Release/*.snupkg
-            
+            ./nupkg/*.nupkg
+            ./nupkg/*.snupkg
           retention-days: 7
           if-no-files-found: error
