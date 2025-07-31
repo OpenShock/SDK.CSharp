@@ -1,4 +1,5 @@
-﻿using OpenShock.MinimalEvents;
+using System.Collections.Generic;
+using OpenShock.MinimalEvents;
 
 namespace OpenShock.SDK.CSharp.Updatables;
 
@@ -9,7 +10,7 @@ public sealed class AsyncUpdatableVariable<T>(T internalValue) : IAsyncUpdatable
         get => _internalValue;
         set
         {
-            if (_internalValue!.Equals(value)) return;
+            if (EqualityComparer<T>.Default.Equals(_internalValue, value)) return;
             _internalValue = value;
             Task.Run(() => _updated.InvokeAsyncParallel(value));
         }
