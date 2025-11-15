@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../Shared.props" />
+    <Import Project="../Shared.props"/>
 
     <PropertyGroup>
         <TargetFramework>net9.0</TargetFramework>
@@ -9,22 +9,21 @@
 
     <ItemGroup>
         <PackageReference Include="coverlet.collector" Version="6.0.4">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="TUnit" Version="0.25.21" />
+        <PackageReference Include="TUnit" Version="0.25.21"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SDK.CSharp.Hub\SDK.CSharp.Hub.csproj" />
-      <ProjectReference Include="..\SDK.CSharp.Live\SDK.CSharp.Live.csproj" />
-      <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj" />
+        <ProjectReference Include="..\SDK.CSharp.Hub\SDK.CSharp.Hub.csproj"/>
+        <ProjectReference Include="..\SDK.CSharp.Live\SDK.CSharp.Live.csproj"/>
+        <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-      <None Update="ApiMockResponses\**">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </None>
+        <None Update="ApiMockResponses\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
-
 </Project>

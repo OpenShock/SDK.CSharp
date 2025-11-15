@@ -1,27 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../Shared.props" />
-    
+    <Import Project="../Shared.props"/>
+
     <PropertyGroup>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="LucHeart.WebsocketLibrary" Version="1.1.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6" />
-        <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1" />
-        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="$(Version)" />
+        <PackageReference Include="LucHeart.WebsocketLibrary" Version="1.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.6"/>
+        <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="3.0.1"/>
+        <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="$(Version)"/>
         <PackageReference Include="PolySharp" Version="1.15.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-        <PackageReference Include="Semver" Version="3.0.0" />
+        <PackageReference Include="Semver" Version="3.0.0"/>
     </ItemGroup>
-    
+
     <ItemGroup Condition=" '$(Configuration)' == 'Debug' ">
-      <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj" />
+        <ProjectReference Include="..\SDK.CSharp\SDK.CSharp.csproj"/>
     </ItemGroup>
-    
+
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-      <PackageReference Include="System.Threading.Channels" Version="9.0.6" />
+        <PackageReference Include="System.Threading.Channels" Version="9.0.6"/>
     </ItemGroup>
 </Project>
