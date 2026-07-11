@@ -43,7 +43,7 @@ jobs:
 
       - name: Pack Base
         run: dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp/SDK.CSharp.csproj
-
+ 
       - name: Add local package source
         run: |
           dotnet nuget add source $(pwd)/nupkg --name LocalPackages

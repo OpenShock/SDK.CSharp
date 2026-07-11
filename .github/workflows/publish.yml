@@ -1,0 +1,100 @@
+name: publish
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  DOTNET_VERSION: 10.0.x
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0  # v7.0.0
+
+      - name: Determine version from tag
+        id: version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          echo "version=${TAG}" >> "$GITHUB_OUTPUT"
+          # AssemblyVersion must stay numeric, so strip any prerelease suffix.
+          echo "assembly=${TAG%%-*}" >> "$GITHUB_OUTPUT"
+
+      - name: Verify project version matches tag
+        run: |
+          PROPS_VERSION=$(grep -oP '(?<=<Version>)[^<]+' Directory.Build.props)
+          EXPECTED="${{ steps.version.outputs.assembly }}"
+          if [ "$PROPS_VERSION" != "$EXPECTED" ]; then
+            echo "::error::Directory.Build.props <Version> ($PROPS_VERSION) does not match tag ${GITHUB_REF_NAME} (expected $EXPECTED)"
+            exit 1
+          fi
+          echo "Version $PROPS_VERSION matches tag ${GITHUB_REF_NAME}"
+
+      - name: Setup .NET SDK ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@26b0ec14cb23fa6904739307f278c14f94c95bf1  # v5.4.0
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build Base
+        run: >
+          dotnet build -c Release SDK.CSharp/SDK.CSharp.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:AssemblyVersion=${{ steps.version.outputs.assembly }}
+          -p:FileVersion=${{ steps.version.outputs.assembly }}
+          -p:InformationalVersion=${{ steps.version.outputs.version }}
+
+      - name: Pack Base
+        run: >
+          dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp/SDK.CSharp.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Add local package source
+        run: dotnet nuget add source $(pwd)/nupkg --name LocalPackages
+
+      - name: Build Hub Extension
+        run: >
+          dotnet build -c Release SDK.CSharp.Hub/SDK.CSharp.Hub.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:AssemblyVersion=${{ steps.version.outputs.assembly }}
+          -p:FileVersion=${{ steps.version.outputs.assembly }}
+          -p:InformationalVersion=${{ steps.version.outputs.version }}
+
+      - name: Pack Hub Extension
+        run: >
+          dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp.Hub/SDK.CSharp.Hub.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Build Live Extension
+        run: >
+          dotnet build -c Release SDK.CSharp.Live/SDK.CSharp.Live.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+          -p:AssemblyVersion=${{ steps.version.outputs.assembly }}
+          -p:FileVersion=${{ steps.version.outputs.assembly }}
+          -p:InformationalVersion=${{ steps.version.outputs.version }}
+
+      - name: Pack Live Extension
+        run: >
+          dotnet pack -c Release --no-build -o ./nupkg SDK.CSharp.Live/SDK.CSharp.Live.csproj
+          -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Login to NuGet.org with trusted publishing
+        id: nuget-login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841  # v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USER }}
+
+      - name: Push to NuGet.org
+        run: >
+          dotnet nuget push "./nupkg/*.nupkg"
+          --source https://api.nuget.org/v3/index.json
+          --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+          --skip-duplicate
