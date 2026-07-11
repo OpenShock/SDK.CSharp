@@ -10,6 +10,7 @@ public static class OpenShockEndpoints
         public static class Shockers
         {
             public const string OwnShockers = "1/shockers/own";
+            public const string SharedShockers = "1/shockers/shared";
             public static string Pause(Guid shockerId) => $"1/shockers/{shockerId}/pause";
         }
         

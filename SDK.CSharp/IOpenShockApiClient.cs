@@ -17,6 +17,14 @@ public interface IOpenShockApiClient
         CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get shockers shared with the authenticated user, grouped by owner and hub.
+    /// </summary>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<OneOf<Success<ImmutableArray<OwnerShockerResponse>>, UnauthenticatedError>> GetSharedShockers(
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Get the gateway a hub is connected to
     /// </summary>
     /// <param name="hubId"></param>

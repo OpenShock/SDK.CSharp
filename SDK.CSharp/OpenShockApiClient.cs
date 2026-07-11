@@ -72,6 +72,25 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     }
 
     /// <inheritdoc />
+    public async Task<OneOf<Success<ImmutableArray<OwnerShockerResponse>>, UnauthenticatedError>>
+        GetSharedShockers(CancellationToken cancellationToken = default)
+    {
+        using var sharedShockersResponse =
+            await _httpClient.GetAsync(OpenShockEndpoints.V1.Shockers.SharedShockers, cancellationToken);
+        if (!sharedShockersResponse.IsSuccess())
+        {
+            if (sharedShockersResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+
+            throw new OpenShockApiError("Failed to get shared shockers", sharedShockersResponse.StatusCode);
+        }
+
+        return new Success<ImmutableArray<OwnerShockerResponse>>(
+            await sharedShockersResponse.Content
+                .ReadBaseResponseAsJsonAsync<ImmutableArray<OwnerShockerResponse>>(cancellationToken,
+                    JsonSerializerOptions));
+    }
+
+    /// <inheritdoc />
     public async
         Task<OneOf<Success<LcgResponse>, NotFound, HubOffline, UnauthenticatedError>>
         GetHubGateway(Guid hubId, CancellationToken cancellationToken = default)
