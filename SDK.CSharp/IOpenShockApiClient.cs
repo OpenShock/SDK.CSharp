@@ -33,6 +33,14 @@ public interface IOpenShockApiClient
     public Task<OneOf<Success<LcgResponse>, NotFound, HubOffline, UnauthenticatedError>> GetHubGateway(Guid hubId, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Get the gateway a hub is connected to, including its public port and path prefix
+    /// </summary>
+    /// <param name="hubId"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<OneOf<Success<LcgResponseV2>, NotFound, HubOffline, UnauthenticatedError>> GetHubGatewayV2(Guid hubId, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Gets the root for the API, this has some useful information and can be used to check if the API is reachable
     /// </summary>
     /// <param name="cancellationToken"></param>

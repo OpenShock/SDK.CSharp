@@ -37,5 +37,10 @@ public static class OpenShockEndpoints
         {
             public const string Control = "2/shockers/control";
         }
+
+        public static class Devices
+        {
+            public static string GetGateway(Guid deviceId) => $"2/devices/{deviceId}/lcg";
+        }
     }
 }

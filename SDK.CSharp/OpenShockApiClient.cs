@@ -124,6 +124,38 @@ public sealed class OpenShockApiClient : IOpenShockApiClient
     }
 
     /// <inheritdoc />
+    public async Task<OneOf<Success<LcgResponseV2>, NotFound, HubOffline, UnauthenticatedError>>
+        GetHubGatewayV2(Guid hubId, CancellationToken cancellationToken = default)
+    {
+        using var gatewayResponse =
+            await _httpClient.GetAsync(OpenShockEndpoints.V2.Devices.GetGateway(hubId), cancellationToken);
+        if (gatewayResponse.IsSuccess())
+        {
+            return new Success<LcgResponseV2>(
+                await gatewayResponse.Content.ReadAsJsonAsync<LcgResponseV2>(cancellationToken,
+                    JsonSerializerOptions));
+        }
+
+        if (gatewayResponse.StatusCode == HttpStatusCode.Unauthorized) return new UnauthenticatedError();
+
+        if (!gatewayResponse.IsProblem())
+            throw new OpenShockApiError("Error from backend is not a problem response", gatewayResponse.StatusCode);
+
+        var problem =
+            await gatewayResponse.Content.ReadAsJsonAsync<ProblemDetails>(cancellationToken,
+                JsonSerializerOptions);
+
+        return problem.Type switch
+        {
+            "Device.NotFound" => new NotFound(),
+            "Hub.NotFound" => new NotFound(),
+            "Device.NotOnline" => new HubOffline(),
+            "Hub.NotOnline" => new HubOffline(),
+            _ => throw new OpenShockApiError($"Unknown problem type [{problem.Type}]", gatewayResponse.StatusCode)
+        };
+    }
+
+    /// <inheritdoc />
     public async Task<RootResponse> GetRoot(CancellationToken cancellationToken = default)
     {
         using var rootResponse = await _httpClient.GetAsync(OpenShockEndpoints.V1.Root, cancellationToken);
