@@ -28,7 +28,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
         Converters = { new CustomJsonStringEnumConverter() }
     };
 
-    public string? Gateway { get; private set; } = null;
+    public LcgResponseV2? Gateway { get; private set; } = null;
     public Guid HubId { get; }
 
     private readonly ILogger<OpenShockLiveControlClient>? _logger;
@@ -96,7 +96,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
     /// <param name="loggerFactory">Logger factor for logging</param>
     /// <param name="programInfo"></param>
     /// <param name="headers">Extra headers</param>
-    public OpenShockLiveControlClient(string gateway, Guid hubId, string authToken,
+    public OpenShockLiveControlClient(LcgResponseV2 gateway, Guid hubId, string authToken,
         ILoggerFactory? loggerFactory = null, ApiClientOptions.ProgramInfo? programInfo = null,
         IEnumerable<KeyValuePair<string, string>>? headers = null) : this(hubId, loggerFactory)
     {
@@ -139,9 +139,9 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
     private async Task<OneOf<WebsocketConnectOptions, Error>> ConnectHook()
     {
-        var hubGatewayResult = await _apiClient!.GetHubGateway(HubId);
-        var gateway = hubGatewayResult.Match<string?>(
-            success => success.Value.Gateway,
+        var hubGatewayResult = await _apiClient!.GetHubGatewayV2(HubId);
+        var gateway = hubGatewayResult.Match<LcgResponseV2?>(
+            success => success.Value,
             notFound =>
             {
                 _logger?.LogWarning("Hub [{HubId}] not found while getting Hub Gateway from API", HubId);
@@ -160,7 +160,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         Gateway = gateway;
 
-        if (string.IsNullOrEmpty(gateway)) return new Error();
+        if (Gateway is null) return new Error();
 
         var uri = new Uri($"wss://{gateway}/1/ws/live/{HubId}");
         return new WebsocketConnectOptions

@@ -9,15 +9,28 @@ namespace OpenShock.SDK.CSharp.Models;
 [JsonConverter(typeof(PermissionTypeConverter))]
 public enum PermissionType
 {
-    [PermissionName("shockers.use")] Shockers_Use,
+    [PermissionName("shockers.use")] Shockers_Use = 0,
 
-    [PermissionName("shockers.edit")] Shockers_Edit,
+    [PermissionName("shockers.edit")] Shockers_Edit = 1,
 
-    [PermissionName("shockers.pause")] Shockers_Pause,
+    [PermissionName("shockers.pause")] Shockers_Pause = 2,
 
-    [PermissionName("devices.edit")] Devices_Edit,
+    [PermissionName("devices.edit")] Devices_Edit = 3,
 
-    [PermissionName("devices.auth")] Devices_Auth
+    [PermissionName("devices.auth")] Devices_Auth = 4,
+
+    [PermissionName("usershares.edit")] Usershares_Edit = 5,
+
+    [PermissionName("usershares.pause")] Usershares_Pause = 6,
+
+    [PermissionName("publicshares.pause")] Publicshares_Pause = 7,
+
+    [PermissionName("publicshares.edit")] Publicshares_Edit = 8,
+
+    /// <summary>
+    /// Fallback for permissions the backend knows about but this SDK version does not.
+    /// </summary>
+    [PermissionName("unknown")] Unknown = int.MaxValue
 }
 
 public sealed class ParentPermissionAttribute : Attribute

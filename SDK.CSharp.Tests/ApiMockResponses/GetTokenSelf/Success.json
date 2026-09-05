@@ -1,0 +1,14 @@
+{
+  "id": "9b0b1f8e-2f2c-4d3a-9a4e-1c0f9b1d2e3a",
+  "name": "Desktop",
+  "createdOn": "2026-09-05T20:24:21.315Z",
+  "validUntil": null,
+  "lastUsed": "2026-09-05T20:24:21.315Z",
+  "permissions": [
+    "shockers.use",
+    "shockers.pause",
+    "usershares.edit",
+    "publicshares.pause",
+    "something.the.sdk.does.not.know"
+  ]
+}

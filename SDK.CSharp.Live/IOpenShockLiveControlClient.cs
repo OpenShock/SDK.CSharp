@@ -7,7 +7,7 @@ namespace OpenShock.SDK.CSharp.Live;
 
 public interface IOpenShockLiveControlClient
 {
-    public string? Gateway { get; }
+    public LcgResponseV2? Gateway { get; }
     public Guid HubId { get; }
     public byte Tps { get; }
     
