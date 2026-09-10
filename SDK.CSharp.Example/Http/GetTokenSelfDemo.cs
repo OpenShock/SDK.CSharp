@@ -1,7 +1,6 @@
 ﻿using System.Text.Json;
-using OpenShock.SDK.CSharp;
 
-namespace SDK.CSharp.Example.Http;
+namespace OpenShock.SDK.CSharp.Example.Http;
 
 public class GetTokenSelfDemo : IExample
 {

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using OpenShock.SDK.CSharp;
 using OpenShock.SDK.CSharp.Live;
 using OpenShock.SDK.CSharp.Models;
 
-namespace SDK.CSharp.Example.Http;
+namespace OpenShock.SDK.CSharp.Example.Http;
 
 public sealed class LiveControlAutoDemo : IExample
 {

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
-using OpenShock.SDK.CSharp;
 using OpenShock.SDK.CSharp.Live;
 using OpenShock.SDK.CSharp.Models;
 
-namespace SDK.CSharp.Example.Http;
+namespace OpenShock.SDK.CSharp.Example.Http;
 
 public sealed class LiveControlDemo : IExample
 {
@@ -30,7 +29,7 @@ public sealed class LiveControlDemo : IExample
             return;
         }
 
-        var gateway = await apiClient.GetHubGateway(_config.Hub.Value);
+        var gateway = await apiClient.GetHubGatewayV2(_config.Hub.Value);
         
        gateway.Switch(success => {},
            found =>
@@ -48,7 +47,7 @@ public sealed class LiveControlDemo : IExample
        
        if(!gateway.IsT0) throw new Exception("Failed to get gateway for hub " + _config.Hub.Value);
         
-        var liveControlClient = new OpenShockLiveControlClient(gateway.AsT0.Value.Gateway, _config.Hub.Value, _config.ApiToken, _loggerFactory);
+        var liveControlClient = new OpenShockLiveControlClient(gateway.AsT0.Value, _config.Hub.Value, _config.ApiToken, _loggerFactory);
 
         await using var stateSub = await liveControlClient.State.Updated.SubscribeAsync(state =>
         {

@@ -1,6 +1,4 @@
-﻿using OpenShock.SDK.CSharp;
-
-namespace SDK.CSharp.Example.Http;
+﻿namespace OpenShock.SDK.CSharp.Example.Http;
 
 public sealed class PauseShocker : IExample
 {

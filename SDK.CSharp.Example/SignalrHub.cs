@@ -2,7 +2,7 @@
 using OpenShock.SDK.CSharp.Models;
 using Serilog;
 
-namespace SDK.CSharp.Example;
+namespace OpenShock.SDK.CSharp.Example;
 
 public sealed class SignalrHub : IExample
 {

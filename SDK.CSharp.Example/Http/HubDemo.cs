@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
-using OpenShock.SDK.CSharp;
 using OpenShock.SDK.CSharp.Hub;
 using OpenShock.SDK.CSharp.Models;
 using Serilog;
 
-namespace SDK.CSharp.Example.Http;
+namespace OpenShock.SDK.CSharp.Example.Http;
 
 public sealed class HubDemo : IExample
 {
