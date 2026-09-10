@@ -16,3 +16,17 @@ public sealed class LcgResponseV2
 
     public required string Country { get; set; }
 }
+
+public static class LcgResponseV2Extensions
+{
+    public static string GetGatewayWsUrl(this LcgResponseV2? gateway) =>
+        gateway is null
+            ? string.Empty
+            : $"wss://{gateway.Host}{(gateway.Port is 443 ? "" : $":{gateway.Port}")}{(gateway.PathPrefix.Trim('/') is { Length: > 0 } path ? $"/{path}" : "")}";
+    
+    public static string GetGatewayDisplayUrl(this LcgResponseV2? gateway) =>
+        gateway is null
+            ? string.Empty
+            : $"{gateway.Host}{(gateway.Port is 443 ? "" : $":{gateway.Port}")}{(gateway.PathPrefix.Trim('/') is { Length: > 0 } path ? $"/{path}" : "")}";
+
+}

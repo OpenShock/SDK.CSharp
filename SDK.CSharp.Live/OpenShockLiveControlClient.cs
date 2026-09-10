@@ -162,7 +162,7 @@ public sealed class OpenShockLiveControlClient : IOpenShockLiveControlClient, IA
 
         if (Gateway is null) return new Error();
 
-        var uri = new Uri($"wss://{gateway}/1/ws/live/{HubId}");
+        var uri = new Uri($"{gateway.GetGatewayWsUrl().TrimEnd('/')}/1/ws/live/{HubId}");
         return new WebsocketConnectOptions
         {
             Uri = uri
