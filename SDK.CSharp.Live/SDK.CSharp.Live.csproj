@@ -5,10 +5,10 @@
 
     <ItemGroup>
         <PackageReference Include="LucHeart.WebsocketLibrary" Version="1.2.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.14" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="11.0.0" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" Version="4.0.1"/>
         <PackageReference Condition=" '$(Configuration)' == 'Release' " Include="OpenShock.SDK.CSharp" Version="$(Version)"/>
-        <PackageReference Include="PolySharp" Version="1.16.0">
+        <PackageReference Include="PolySharp" Version="1.17.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
@@ -20,6 +20,6 @@
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-      <PackageReference Include="System.Threading.Channels" Version="10.0.14" />
+      <PackageReference Include="System.Threading.Channels" Version="11.0.0" />
     </ItemGroup>
 </Project>
